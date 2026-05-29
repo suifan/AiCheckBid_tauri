@@ -1,0 +1,18 @@
+﻿{
+    "generatedAt":  "2026-05-07T20:00:52",
+    "ruleKeyParity":  {
+                          "totalKeys":  72,
+                          "matched":  61,
+                          "missingInNew":  0,
+                          "onlyInNew":  11,
+                          "pass":  true
+                      },
+    "baselineRegression":  {
+                               "tolerance":  0,
+                               "errors":  [
+
+                                          ],
+                               "pass":  true
+                           },
+    "overallPass":  true
+}

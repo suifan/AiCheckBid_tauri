@@ -1,0 +1,168 @@
+﻿# Rule Implementation Matrix
+
+- TotalRules: 93
+- Matched: 31
+- MissingInNew: 45
+- OnlyInNew: 17
+- NoSignal: 0
+
+## Missing In New
+- [标题] 
+- [表格] 
+- [表格] 
+- [表格] 
+- [二级标题] 
+- [二级标题] 
+- [二级标题] 
+- [二级标题] 
+- [检查项] 
+- [检查项] 
+- [检查项] 
+- [六级标题] 
+- [六级标题] 
+- [六级标题] 
+- [六级标题] 
+- [七级标题] 
+- [七级标题] 
+- [七级标题] 
+- [七级标题] 
+- [三级标题] 
+- [三级标题] 
+- [三级标题] 
+- [三级标题] 
+- [四级标题] 
+- [四级标题] 
+- [四级标题] 
+- [四级标题] 
+- [五级标题] 
+- [五级标题] 
+- [五级标题] 
+- [五级标题] 
+- [页面] 
+- [页面] 
+- [页面] 
+- [页面] 
+- [页面] 
+- [页面] 
+- [页面] 
+- [页面] 
+- [一级标题] 
+- [一级标题] 
+- [一级标题] 
+- [一级标题] 
+- [正文] 
+- [正文] 
+
+## Only In New
+- [检查项] 
+- [检查项] 
+- [检查项] 
+- [检查项] 
+- [检查项] 
+- [检查项] 
+- [检查项] 
+- [检查项] 
+- [检查项] 
+- [检查项] 
+- [检查项] 
+- [检查项] 
+- [检查项] 
+- [检查项] 
+- [检查项] 
+- [页面] 
+- [页面] 
+
+## Detailed
+- [标题] : old=True, new=False, net48=True, net8=True, parity=MISSING_IN_NEW
+- [标题] : old=True, new=True, net48=True, net8=True, parity=MATCHED
+- [表格] : old=True, new=True, net48=True, net8=True, parity=MATCHED
+- [表格] : old=True, new=True, net48=True, net8=True, parity=MATCHED
+- [表格] : old=True, new=False, net48=True, net8=True, parity=MISSING_IN_NEW
+- [表格] : old=True, new=False, net48=True, net8=True, parity=MISSING_IN_NEW
+- [表格] : old=True, new=True, net48=True, net8=True, parity=MATCHED
+- [表格] : old=True, new=True, net48=True, net8=True, parity=MATCHED
+- [表格] : old=True, new=True, net48=True, net8=True, parity=MATCHED
+- [表格] : old=True, new=False, net48=True, net8=True, parity=MISSING_IN_NEW
+- [表格] : old=True, new=True, net48=True, net8=True, parity=MATCHED
+- [表格] : old=True, new=True, net48=True, net8=True, parity=MATCHED
+- [二级标题] : old=True, new=False, net48=True, net8=True, parity=MISSING_IN_NEW
+- [二级标题] : old=True, new=False, net48=True, net8=True, parity=MISSING_IN_NEW
+- [二级标题] : old=True, new=False, net48=True, net8=True, parity=MISSING_IN_NEW
+- [二级标题] : old=True, new=False, net48=True, net8=True, parity=MISSING_IN_NEW
+- [检查项] : old=True, new=True, net48=True, net8=True, parity=MATCHED
+- [检查项] : old=True, new=True, net48=True, net8=True, parity=MATCHED
+- [检查项] : old=True, new=True, net48=True, net8=True, parity=MATCHED
+- [检查项] : old=True, new=True, net48=True, net8=True, parity=MATCHED
+- [检查项] : old=True, new=True, net48=True, net8=True, parity=MATCHED
+- [检查项] : old=True, new=True, net48=True, net8=True, parity=MATCHED
+- [检查项] : old=True, new=True, net48=True, net8=True, parity=MATCHED
+- [检查项] : old=True, new=True, net48=True, net8=True, parity=MATCHED
+- [检查项] : old=True, new=True, net48=True, net8=True, parity=MATCHED
+- [检查项] : old=True, new=False, net48=True, net8=True, parity=MISSING_IN_NEW
+- [检查项] : old=True, new=True, net48=True, net8=True, parity=MATCHED
+- [检查项] : old=True, new=True, net48=True, net8=True, parity=MATCHED
+- [检查项] : old=False, new=True, net48=True, net8=True, parity=ONLY_IN_NEW
+- [检查项] : old=False, new=True, net48=True, net8=True, parity=ONLY_IN_NEW
+- [检查项] : old=False, new=True, net48=True, net8=True, parity=ONLY_IN_NEW
+- [检查项] : old=False, new=True, net48=True, net8=True, parity=ONLY_IN_NEW
+- [检查项] : old=False, new=True, net48=True, net8=True, parity=ONLY_IN_NEW
+- [检查项] : old=False, new=True, net48=True, net8=True, parity=ONLY_IN_NEW
+- [检查项] : old=False, new=True, net48=True, net8=True, parity=ONLY_IN_NEW
+- [检查项] : old=False, new=True, net48=True, net8=True, parity=ONLY_IN_NEW
+- [检查项] : old=False, new=True, net48=True, net8=True, parity=ONLY_IN_NEW
+- [检查项] : old=False, new=True, net48=True, net8=True, parity=ONLY_IN_NEW
+- [检查项] : old=False, new=True, net48=True, net8=True, parity=ONLY_IN_NEW
+- [检查项] : old=True, new=False, net48=True, net8=True, parity=MISSING_IN_NEW
+- [检查项] : old=False, new=True, net48=True, net8=True, parity=ONLY_IN_NEW
+- [检查项] : old=False, new=True, net48=True, net8=True, parity=ONLY_IN_NEW
+- [检查项] : old=False, new=True, net48=True, net8=True, parity=ONLY_IN_NEW
+- [检查项] : old=False, new=True, net48=True, net8=True, parity=ONLY_IN_NEW
+- [检查项] : old=True, new=True, net48=True, net8=True, parity=MATCHED
+- [检查项] : old=True, new=False, net48=True, net8=True, parity=MISSING_IN_NEW
+- [六级标题] : old=True, new=False, net48=True, net8=True, parity=MISSING_IN_NEW
+- [六级标题] : old=True, new=False, net48=True, net8=True, parity=MISSING_IN_NEW
+- [六级标题] : old=True, new=False, net48=True, net8=True, parity=MISSING_IN_NEW
+- [六级标题] : old=True, new=False, net48=True, net8=True, parity=MISSING_IN_NEW
+- [七级标题] : old=True, new=False, net48=True, net8=True, parity=MISSING_IN_NEW
+- [七级标题] : old=True, new=False, net48=True, net8=True, parity=MISSING_IN_NEW
+- [七级标题] : old=True, new=False, net48=True, net8=True, parity=MISSING_IN_NEW
+- [七级标题] : old=True, new=False, net48=True, net8=True, parity=MISSING_IN_NEW
+- [三级标题] : old=True, new=False, net48=True, net8=True, parity=MISSING_IN_NEW
+- [三级标题] : old=True, new=False, net48=True, net8=True, parity=MISSING_IN_NEW
+- [三级标题] : old=True, new=False, net48=True, net8=True, parity=MISSING_IN_NEW
+- [三级标题] : old=True, new=False, net48=True, net8=True, parity=MISSING_IN_NEW
+- [四级标题] : old=True, new=False, net48=True, net8=True, parity=MISSING_IN_NEW
+- [四级标题] : old=True, new=False, net48=True, net8=True, parity=MISSING_IN_NEW
+- [四级标题] : old=True, new=False, net48=True, net8=True, parity=MISSING_IN_NEW
+- [四级标题] : old=True, new=False, net48=True, net8=True, parity=MISSING_IN_NEW
+- [五级标题] : old=True, new=False, net48=True, net8=True, parity=MISSING_IN_NEW
+- [五级标题] : old=True, new=False, net48=True, net8=True, parity=MISSING_IN_NEW
+- [五级标题] : old=True, new=False, net48=True, net8=True, parity=MISSING_IN_NEW
+- [五级标题] : old=True, new=False, net48=True, net8=True, parity=MISSING_IN_NEW
+- [页面] : old=False, new=True, net48=True, net8=True, parity=ONLY_IN_NEW
+- [页面] : old=True, new=False, net48=True, net8=True, parity=MISSING_IN_NEW
+- [页面] : old=True, new=False, net48=True, net8=True, parity=MISSING_IN_NEW
+- [页面] : old=False, new=True, net48=True, net8=True, parity=ONLY_IN_NEW
+- [页面] : old=True, new=True, net48=True, net8=True, parity=MATCHED
+- [页面] : old=True, new=False, net48=True, net8=True, parity=MISSING_IN_NEW
+- [页面] : old=True, new=False, net48=True, net8=True, parity=MISSING_IN_NEW
+- [页面] : old=True, new=False, net48=True, net8=True, parity=MISSING_IN_NEW
+- [页面] : old=True, new=True, net48=True, net8=True, parity=MATCHED
+- [页面] : old=True, new=False, net48=True, net8=True, parity=MISSING_IN_NEW
+- [页面] : old=True, new=False, net48=True, net8=True, parity=MISSING_IN_NEW
+- [页面] : old=True, new=True, net48=True, net8=True, parity=MATCHED
+- [页面] : old=True, new=False, net48=True, net8=True, parity=MISSING_IN_NEW
+- [页面] : old=True, new=True, net48=True, net8=True, parity=MATCHED
+- [页面] : old=True, new=True, net48=True, net8=True, parity=MATCHED
+- [一级标题] : old=True, new=False, net48=True, net8=True, parity=MISSING_IN_NEW
+- [一级标题] : old=True, new=False, net48=True, net8=True, parity=MISSING_IN_NEW
+- [一级标题] : old=True, new=False, net48=True, net8=True, parity=MISSING_IN_NEW
+- [一级标题] : old=True, new=False, net48=True, net8=True, parity=MISSING_IN_NEW
+- [正文] : old=True, new=False, net48=True, net8=True, parity=MISSING_IN_NEW
+- [正文] : old=True, new=True, net48=True, net8=True, parity=MATCHED
+- [正文] : old=True, new=False, net48=True, net8=True, parity=MISSING_IN_NEW
+- [正文] : old=True, new=True, net48=True, net8=True, parity=MATCHED
+- [正文] : old=True, new=True, net48=True, net8=True, parity=MATCHED
+- [正文] : old=True, new=True, net48=True, net8=True, parity=MATCHED
+- [正文] : old=True, new=True, net48=True, net8=True, parity=MATCHED
+- [正文] : old=True, new=True, net48=True, net8=True, parity=MATCHED

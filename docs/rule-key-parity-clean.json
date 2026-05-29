@@ -1,0 +1,722 @@
+﻿[
+    {
+        "section":  "检查项",
+        "key":  "格式检查",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "newNet48":  true,
+        "newNet8":  true,
+        "titleGeneric":  false,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "检查项",
+        "key":  "智能修正",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "newNet48":  true,
+        "newNet8":  true,
+        "titleGeneric":  false,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "检查项",
+        "key":  "输出页码",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "newNet48":  true,
+        "newNet8":  false,
+        "titleGeneric":  false,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "检查项",
+        "key":  "批注标记",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "newNet48":  true,
+        "newNet8":  false,
+        "titleGeneric":  false,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "检查项",
+        "key":  "非中文字体",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "newNet48":  true,
+        "newNet8":  true,
+        "titleGeneric":  false,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "检查项",
+        "key":  "敏感词词典",
+        "oldImplemented":  false,
+        "newImplemented":  true,
+        "newNet48":  false,
+        "newNet8":  true,
+        "titleGeneric":  false,
+        "parity":  "ONLY_IN_NEW"
+    },
+    {
+        "section":  "检查项",
+        "key":  "敏感词列表",
+        "oldImplemented":  false,
+        "newImplemented":  true,
+        "newNet48":  false,
+        "newNet8":  true,
+        "titleGeneric":  false,
+        "parity":  "ONLY_IN_NEW"
+    },
+    {
+        "section":  "检查项",
+        "key":  "地名词典",
+        "oldImplemented":  false,
+        "newImplemented":  true,
+        "newNet48":  false,
+        "newNet8":  true,
+        "titleGeneric":  false,
+        "parity":  "ONLY_IN_NEW"
+    },
+    {
+        "section":  "检查项",
+        "key":  "地名列表",
+        "oldImplemented":  false,
+        "newImplemented":  true,
+        "newNet48":  false,
+        "newNet8":  true,
+        "titleGeneric":  false,
+        "parity":  "ONLY_IN_NEW"
+    },
+    {
+        "section":  "检查项",
+        "key":  "地名库",
+        "oldImplemented":  false,
+        "newImplemented":  true,
+        "newNet48":  false,
+        "newNet8":  true,
+        "titleGeneric":  false,
+        "parity":  "ONLY_IN_NEW"
+    },
+    {
+        "section":  "检查项",
+        "key":  "公司名词典",
+        "oldImplemented":  false,
+        "newImplemented":  true,
+        "newNet48":  false,
+        "newNet8":  true,
+        "titleGeneric":  false,
+        "parity":  "ONLY_IN_NEW"
+    },
+    {
+        "section":  "检查项",
+        "key":  "公司名列表",
+        "oldImplemented":  false,
+        "newImplemented":  true,
+        "newNet48":  false,
+        "newNet8":  true,
+        "titleGeneric":  false,
+        "parity":  "ONLY_IN_NEW"
+    },
+    {
+        "section":  "检查项",
+        "key":  "公司列表",
+        "oldImplemented":  false,
+        "newImplemented":  true,
+        "newNet48":  false,
+        "newNet8":  true,
+        "titleGeneric":  false,
+        "parity":  "ONLY_IN_NEW"
+    },
+    {
+        "section":  "检查项",
+        "key":  "标点词典",
+        "oldImplemented":  false,
+        "newImplemented":  true,
+        "newNet48":  false,
+        "newNet8":  true,
+        "titleGeneric":  false,
+        "parity":  "ONLY_IN_NEW"
+    },
+    {
+        "section":  "检查项",
+        "key":  "标点符号",
+        "oldImplemented":  false,
+        "newImplemented":  true,
+        "newNet48":  false,
+        "newNet8":  true,
+        "titleGeneric":  false,
+        "parity":  "ONLY_IN_NEW"
+    },
+    {
+        "section":  "检查项",
+        "key":  "符号词典",
+        "oldImplemented":  false,
+        "newImplemented":  true,
+        "newNet48":  false,
+        "newNet8":  true,
+        "titleGeneric":  false,
+        "parity":  "ONLY_IN_NEW"
+    },
+    {
+        "section":  "检查项",
+        "key":  "检查空白行",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "newNet48":  true,
+        "newNet8":  true,
+        "titleGeneric":  false,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "检查项",
+        "key":  "检查空格",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "newNet48":  true,
+        "newNet8":  true,
+        "titleGeneric":  false,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "检查项",
+        "key":  "检查加粗下划线斜体颜色",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "newNet48":  true,
+        "newNet8":  true,
+        "titleGeneric":  false,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "检查项",
+        "key":  "检查段前段后",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "newNet48":  true,
+        "newNet8":  true,
+        "titleGeneric":  false,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "页面",
+        "key":  "上边距",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "newNet48":  false,
+        "newNet8":  false,
+        "titleGeneric":  false,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "页面",
+        "key":  "下边距",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "newNet48":  false,
+        "newNet8":  true,
+        "titleGeneric":  false,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "页面",
+        "key":  "左边距",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "newNet48":  false,
+        "newNet8":  false,
+        "titleGeneric":  false,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "页面",
+        "key":  "右边距",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "newNet48":  false,
+        "newNet8":  false,
+        "titleGeneric":  false,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "页面",
+        "key":  "页眉顶端边距",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "newNet48":  false,
+        "newNet8":  false,
+        "titleGeneric":  false,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "页面",
+        "key":  "页眉底端边距",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "newNet48":  false,
+        "newNet8":  false,
+        "titleGeneric":  false,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "页面",
+        "key":  "页面大小",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "newNet48":  true,
+        "newNet8":  true,
+        "titleGeneric":  false,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "页面",
+        "key":  "页面方向",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "newNet48":  true,
+        "newNet8":  true,
+        "titleGeneric":  false,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "正文",
+        "key":  "字体",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "newNet48":  true,
+        "newNet8":  true,
+        "titleGeneric":  true,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "正文",
+        "key":  "字号",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "newNet48":  true,
+        "newNet8":  true,
+        "titleGeneric":  true,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "正文",
+        "key":  "行距",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "newNet48":  true,
+        "newNet8":  false,
+        "titleGeneric":  false,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "正文",
+        "key":  "固定值",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "newNet48":  true,
+        "newNet8":  false,
+        "titleGeneric":  false,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "正文",
+        "key":  "首行缩进字符数",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "newNet48":  true,
+        "newNet8":  true,
+        "titleGeneric":  false,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "正文",
+        "key":  "对齐方式",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "newNet48":  true,
+        "newNet8":  true,
+        "titleGeneric":  false,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "正文",
+        "key":  "字间距",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "newNet48":  true,
+        "newNet8":  false,
+        "titleGeneric":  false,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "表格",
+        "key":  "字体",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "newNet48":  true,
+        "newNet8":  true,
+        "titleGeneric":  true,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "表格",
+        "key":  "字号",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "newNet48":  true,
+        "newNet8":  true,
+        "titleGeneric":  true,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "表格",
+        "key":  "行距",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "newNet48":  true,
+        "newNet8":  false,
+        "titleGeneric":  false,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "表格",
+        "key":  "固定值",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "newNet48":  true,
+        "newNet8":  false,
+        "titleGeneric":  false,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "表格",
+        "key":  "字间距",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "newNet48":  true,
+        "newNet8":  false,
+        "titleGeneric":  false,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "表格",
+        "key":  "表格水平对齐方式",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "newNet48":  true,
+        "newNet8":  true,
+        "titleGeneric":  false,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "表格",
+        "key":  "纵向对齐方式",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "newNet48":  true,
+        "newNet8":  true,
+        "titleGeneric":  false,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "表格",
+        "key":  "线条宽度",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "newNet48":  true,
+        "newNet8":  true,
+        "titleGeneric":  false,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "标题",
+        "key":  "序号后空格",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "newNet48":  true,
+        "newNet8":  true,
+        "titleGeneric":  false,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "一级标题",
+        "key":  "标题规则",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "newNet48":  false,
+        "newNet8":  false,
+        "titleGeneric":  true,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "一级标题",
+        "key":  "字体",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "newNet48":  false,
+        "newNet8":  false,
+        "titleGeneric":  true,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "一级标题",
+        "key":  "字号",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "newNet48":  false,
+        "newNet8":  false,
+        "titleGeneric":  true,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "一级标题",
+        "key":  "加粗",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "newNet48":  false,
+        "newNet8":  false,
+        "titleGeneric":  true,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "二级标题",
+        "key":  "标题规则",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "newNet48":  false,
+        "newNet8":  false,
+        "titleGeneric":  true,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "二级标题",
+        "key":  "字体",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "newNet48":  false,
+        "newNet8":  false,
+        "titleGeneric":  true,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "二级标题",
+        "key":  "字号",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "newNet48":  false,
+        "newNet8":  false,
+        "titleGeneric":  true,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "二级标题",
+        "key":  "加粗",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "newNet48":  false,
+        "newNet8":  false,
+        "titleGeneric":  true,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "三级标题",
+        "key":  "标题规则",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "newNet48":  false,
+        "newNet8":  false,
+        "titleGeneric":  true,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "三级标题",
+        "key":  "字体",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "newNet48":  false,
+        "newNet8":  false,
+        "titleGeneric":  true,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "三级标题",
+        "key":  "字号",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "newNet48":  false,
+        "newNet8":  false,
+        "titleGeneric":  true,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "三级标题",
+        "key":  "加粗",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "newNet48":  false,
+        "newNet8":  false,
+        "titleGeneric":  true,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "四级标题",
+        "key":  "标题规则",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "newNet48":  false,
+        "newNet8":  false,
+        "titleGeneric":  true,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "四级标题",
+        "key":  "字体",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "newNet48":  false,
+        "newNet8":  false,
+        "titleGeneric":  true,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "四级标题",
+        "key":  "字号",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "newNet48":  false,
+        "newNet8":  false,
+        "titleGeneric":  true,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "四级标题",
+        "key":  "加粗",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "newNet48":  false,
+        "newNet8":  false,
+        "titleGeneric":  true,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "五级标题",
+        "key":  "标题规则",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "newNet48":  false,
+        "newNet8":  false,
+        "titleGeneric":  true,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "五级标题",
+        "key":  "字体",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "newNet48":  false,
+        "newNet8":  false,
+        "titleGeneric":  true,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "五级标题",
+        "key":  "字号",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "newNet48":  false,
+        "newNet8":  false,
+        "titleGeneric":  true,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "五级标题",
+        "key":  "加粗",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "newNet48":  false,
+        "newNet8":  false,
+        "titleGeneric":  true,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "六级标题",
+        "key":  "标题规则",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "newNet48":  false,
+        "newNet8":  false,
+        "titleGeneric":  true,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "六级标题",
+        "key":  "字体",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "newNet48":  false,
+        "newNet8":  false,
+        "titleGeneric":  true,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "六级标题",
+        "key":  "字号",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "newNet48":  false,
+        "newNet8":  false,
+        "titleGeneric":  true,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "六级标题",
+        "key":  "加粗",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "newNet48":  false,
+        "newNet8":  false,
+        "titleGeneric":  true,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "七级标题",
+        "key":  "标题规则",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "newNet48":  false,
+        "newNet8":  false,
+        "titleGeneric":  true,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "七级标题",
+        "key":  "字体",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "newNet48":  false,
+        "newNet8":  false,
+        "titleGeneric":  true,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "七级标题",
+        "key":  "字号",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "newNet48":  false,
+        "newNet8":  false,
+        "titleGeneric":  true,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "七级标题",
+        "key":  "加粗",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "newNet48":  false,
+        "newNet8":  false,
+        "titleGeneric":  true,
+        "parity":  "MATCHED"
+    }
+]

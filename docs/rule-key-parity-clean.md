@@ -1,0 +1,97 @@
+﻿# Clean Rule Key Parity
+
+- TotalKeys: 72
+- Matched: 61
+- MissingInNew: 0
+- OnlyInNew: 11
+- UnusedBoth: 0
+
+## Missing In New
+- None
+
+## Only In New
+- [检查项] 标点词典
+- [检查项] 标点符号
+- [检查项] 地名词典
+- [检查项] 地名库
+- [检查项] 地名列表
+- [检查项] 符号词典
+- [检查项] 公司列表
+- [检查项] 公司名词典
+- [检查项] 公司名列表
+- [检查项] 敏感词词典
+- [检查项] 敏感词列表
+
+## Detailed
+- [标题] 序号后空格: old=True, new=True, n48=True, n8=True, titleGeneric=False, parity=MATCHED
+- [表格] 表格水平对齐方式: old=True, new=True, n48=True, n8=True, titleGeneric=False, parity=MATCHED
+- [表格] 固定值: old=True, new=True, n48=True, n8=False, titleGeneric=False, parity=MATCHED
+- [表格] 线条宽度: old=True, new=True, n48=True, n8=True, titleGeneric=False, parity=MATCHED
+- [表格] 行距: old=True, new=True, n48=True, n8=False, titleGeneric=False, parity=MATCHED
+- [表格] 字号: old=True, new=True, n48=True, n8=True, titleGeneric=True, parity=MATCHED
+- [表格] 字间距: old=True, new=True, n48=True, n8=False, titleGeneric=False, parity=MATCHED
+- [表格] 字体: old=True, new=True, n48=True, n8=True, titleGeneric=True, parity=MATCHED
+- [表格] 纵向对齐方式: old=True, new=True, n48=True, n8=True, titleGeneric=False, parity=MATCHED
+- [二级标题] 标题规则: old=True, new=True, n48=False, n8=False, titleGeneric=True, parity=MATCHED
+- [二级标题] 加粗: old=True, new=True, n48=False, n8=False, titleGeneric=True, parity=MATCHED
+- [二级标题] 字号: old=True, new=True, n48=False, n8=False, titleGeneric=True, parity=MATCHED
+- [二级标题] 字体: old=True, new=True, n48=False, n8=False, titleGeneric=True, parity=MATCHED
+- [检查项] 标点词典: old=False, new=True, n48=False, n8=True, titleGeneric=False, parity=ONLY_IN_NEW
+- [检查项] 标点符号: old=False, new=True, n48=False, n8=True, titleGeneric=False, parity=ONLY_IN_NEW
+- [检查项] 地名词典: old=False, new=True, n48=False, n8=True, titleGeneric=False, parity=ONLY_IN_NEW
+- [检查项] 地名库: old=False, new=True, n48=False, n8=True, titleGeneric=False, parity=ONLY_IN_NEW
+- [检查项] 地名列表: old=False, new=True, n48=False, n8=True, titleGeneric=False, parity=ONLY_IN_NEW
+- [检查项] 非中文字体: old=True, new=True, n48=True, n8=True, titleGeneric=False, parity=MATCHED
+- [检查项] 符号词典: old=False, new=True, n48=False, n8=True, titleGeneric=False, parity=ONLY_IN_NEW
+- [检查项] 格式检查: old=True, new=True, n48=True, n8=True, titleGeneric=False, parity=MATCHED
+- [检查项] 公司列表: old=False, new=True, n48=False, n8=True, titleGeneric=False, parity=ONLY_IN_NEW
+- [检查项] 公司名词典: old=False, new=True, n48=False, n8=True, titleGeneric=False, parity=ONLY_IN_NEW
+- [检查项] 公司名列表: old=False, new=True, n48=False, n8=True, titleGeneric=False, parity=ONLY_IN_NEW
+- [检查项] 检查段前段后: old=True, new=True, n48=True, n8=True, titleGeneric=False, parity=MATCHED
+- [检查项] 检查加粗下划线斜体颜色: old=True, new=True, n48=True, n8=True, titleGeneric=False, parity=MATCHED
+- [检查项] 检查空白行: old=True, new=True, n48=True, n8=True, titleGeneric=False, parity=MATCHED
+- [检查项] 检查空格: old=True, new=True, n48=True, n8=True, titleGeneric=False, parity=MATCHED
+- [检查项] 敏感词词典: old=False, new=True, n48=False, n8=True, titleGeneric=False, parity=ONLY_IN_NEW
+- [检查项] 敏感词列表: old=False, new=True, n48=False, n8=True, titleGeneric=False, parity=ONLY_IN_NEW
+- [检查项] 批注标记: old=True, new=True, n48=True, n8=False, titleGeneric=False, parity=MATCHED
+- [检查项] 输出页码: old=True, new=True, n48=True, n8=False, titleGeneric=False, parity=MATCHED
+- [检查项] 智能修正: old=True, new=True, n48=True, n8=True, titleGeneric=False, parity=MATCHED
+- [六级标题] 标题规则: old=True, new=True, n48=False, n8=False, titleGeneric=True, parity=MATCHED
+- [六级标题] 加粗: old=True, new=True, n48=False, n8=False, titleGeneric=True, parity=MATCHED
+- [六级标题] 字号: old=True, new=True, n48=False, n8=False, titleGeneric=True, parity=MATCHED
+- [六级标题] 字体: old=True, new=True, n48=False, n8=False, titleGeneric=True, parity=MATCHED
+- [七级标题] 标题规则: old=True, new=True, n48=False, n8=False, titleGeneric=True, parity=MATCHED
+- [七级标题] 加粗: old=True, new=True, n48=False, n8=False, titleGeneric=True, parity=MATCHED
+- [七级标题] 字号: old=True, new=True, n48=False, n8=False, titleGeneric=True, parity=MATCHED
+- [七级标题] 字体: old=True, new=True, n48=False, n8=False, titleGeneric=True, parity=MATCHED
+- [三级标题] 标题规则: old=True, new=True, n48=False, n8=False, titleGeneric=True, parity=MATCHED
+- [三级标题] 加粗: old=True, new=True, n48=False, n8=False, titleGeneric=True, parity=MATCHED
+- [三级标题] 字号: old=True, new=True, n48=False, n8=False, titleGeneric=True, parity=MATCHED
+- [三级标题] 字体: old=True, new=True, n48=False, n8=False, titleGeneric=True, parity=MATCHED
+- [四级标题] 标题规则: old=True, new=True, n48=False, n8=False, titleGeneric=True, parity=MATCHED
+- [四级标题] 加粗: old=True, new=True, n48=False, n8=False, titleGeneric=True, parity=MATCHED
+- [四级标题] 字号: old=True, new=True, n48=False, n8=False, titleGeneric=True, parity=MATCHED
+- [四级标题] 字体: old=True, new=True, n48=False, n8=False, titleGeneric=True, parity=MATCHED
+- [五级标题] 标题规则: old=True, new=True, n48=False, n8=False, titleGeneric=True, parity=MATCHED
+- [五级标题] 加粗: old=True, new=True, n48=False, n8=False, titleGeneric=True, parity=MATCHED
+- [五级标题] 字号: old=True, new=True, n48=False, n8=False, titleGeneric=True, parity=MATCHED
+- [五级标题] 字体: old=True, new=True, n48=False, n8=False, titleGeneric=True, parity=MATCHED
+- [页面] 上边距: old=True, new=True, n48=False, n8=False, titleGeneric=False, parity=MATCHED
+- [页面] 下边距: old=True, new=True, n48=False, n8=True, titleGeneric=False, parity=MATCHED
+- [页面] 页眉底端边距: old=True, new=True, n48=False, n8=False, titleGeneric=False, parity=MATCHED
+- [页面] 页眉顶端边距: old=True, new=True, n48=False, n8=False, titleGeneric=False, parity=MATCHED
+- [页面] 页面大小: old=True, new=True, n48=True, n8=True, titleGeneric=False, parity=MATCHED
+- [页面] 页面方向: old=True, new=True, n48=True, n8=True, titleGeneric=False, parity=MATCHED
+- [页面] 右边距: old=True, new=True, n48=False, n8=False, titleGeneric=False, parity=MATCHED
+- [页面] 左边距: old=True, new=True, n48=False, n8=False, titleGeneric=False, parity=MATCHED
+- [一级标题] 标题规则: old=True, new=True, n48=False, n8=False, titleGeneric=True, parity=MATCHED
+- [一级标题] 加粗: old=True, new=True, n48=False, n8=False, titleGeneric=True, parity=MATCHED
+- [一级标题] 字号: old=True, new=True, n48=False, n8=False, titleGeneric=True, parity=MATCHED
+- [一级标题] 字体: old=True, new=True, n48=False, n8=False, titleGeneric=True, parity=MATCHED
+- [正文] 对齐方式: old=True, new=True, n48=True, n8=True, titleGeneric=False, parity=MATCHED
+- [正文] 固定值: old=True, new=True, n48=True, n8=False, titleGeneric=False, parity=MATCHED
+- [正文] 首行缩进字符数: old=True, new=True, n48=True, n8=True, titleGeneric=False, parity=MATCHED
+- [正文] 行距: old=True, new=True, n48=True, n8=False, titleGeneric=False, parity=MATCHED
+- [正文] 字号: old=True, new=True, n48=True, n8=True, titleGeneric=True, parity=MATCHED
+- [正文] 字间距: old=True, new=True, n48=True, n8=False, titleGeneric=False, parity=MATCHED
+- [正文] 字体: old=True, new=True, n48=True, n8=True, titleGeneric=True, parity=MATCHED

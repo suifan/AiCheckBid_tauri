@@ -1,0 +1,15 @@
+﻿{
+    "generatedAt":  "2026-05-07T17:06:34",
+    "samples":  [
+                    {
+                        "file":  "xinhan.pdf",
+                        "issueCount":  208,
+                        "report":  "d:\\work\\ollama\\result\\xinhan-检查结果.txt"
+                    },
+                    {
+                        "file":  "jialin.pdf",
+                        "issueCount":  671,
+                        "report":  "d:\\work\\ollama\\result\\jialin-检查结果.txt"
+                    }
+                ]
+}

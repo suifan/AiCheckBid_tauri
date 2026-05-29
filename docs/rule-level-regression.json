@@ -1,0 +1,127 @@
+﻿{
+    "generatedAt":  "2026-05-07T20:00:52",
+    "samples":  [
+                    {
+                        "file":  "xinhan.pdf",
+                        "fullPath":  "d:\\work\\ollama\\xinhan.pdf",
+                        "issueCount":  208,
+                        "reportPath":  "d:\\work\\ollama\\result\\xinhan-检查结果.txt",
+                        "reportDocx":  "d:\\work\\ollama\\result\\xinhan-检查结果.docx",
+                        "rules":  [
+                                      {
+                                          "rule":  "左边距",
+                                          "count":  74
+                                      },
+                                      {
+                                          "rule":  "右边距",
+                                          "count":  74
+                                      },
+                                      {
+                                          "rule":  "字体",
+                                          "count":  21
+                                      },
+                                      {
+                                          "rule":  "检查加粗下划线斜体颜色",
+                                          "count":  14
+                                      },
+                                      {
+                                          "rule":  "字号",
+                                          "count":  12
+                                      },
+                                      {
+                                          "rule":  "标题规则",
+                                          "count":  8
+                                      },
+                                      {
+                                          "rule":  "下边距",
+                                          "count":  3
+                                      },
+                                      {
+                                          "rule":  "表格水平对齐方式",
+                                          "count":  2
+                                      }
+                                  ],
+                        "categories":  [
+                                           {
+                                               "category":  "页面",
+                                               "count":  151
+                                           },
+                                           {
+                                               "category":  "标题",
+                                               "count":  42
+                                           },
+                                           {
+                                               "category":  "正文",
+                                               "count":  9
+                                           },
+                                           {
+                                               "category":  "表格",
+                                               "count":  6
+                                           }
+                                       ]
+                    },
+                    {
+                        "file":  "jialin.pdf",
+                        "fullPath":  "d:\\work\\ollama\\jialin.pdf",
+                        "issueCount":  671,
+                        "reportPath":  "d:\\work\\ollama\\result\\jialin-检查结果.txt",
+                        "reportDocx":  "d:\\work\\ollama\\result\\jialin-检查结果.docx",
+                        "rules":  [
+                                      {
+                                          "rule":  "左边距",
+                                          "count":  297
+                                      },
+                                      {
+                                          "rule":  "右边距",
+                                          "count":  297
+                                      },
+                                      {
+                                          "rule":  "检查加粗下划线斜体颜色",
+                                          "count":  22
+                                      },
+                                      {
+                                          "rule":  "标题规则",
+                                          "count":  20
+                                      },
+                                      {
+                                          "rule":  "字体",
+                                          "count":  17
+                                      },
+                                      {
+                                          "rule":  "字号",
+                                          "count":  8
+                                      },
+                                      {
+                                          "rule":  "下边距",
+                                          "count":  8
+                                      },
+                                      {
+                                          "rule":  "序号后空格",
+                                          "count":  1
+                                      },
+                                      {
+                                          "rule":  "表格水平对齐方式",
+                                          "count":  1
+                                      }
+                                  ],
+                        "categories":  [
+                                           {
+                                               "category":  "页面",
+                                               "count":  602
+                                           },
+                                           {
+                                               "category":  "标题",
+                                               "count":  65
+                                           },
+                                           {
+                                               "category":  "正文",
+                                               "count":  2
+                                           },
+                                           {
+                                               "category":  "表格",
+                                               "count":  2
+                                           }
+                                       ]
+                    }
+                ]
+}

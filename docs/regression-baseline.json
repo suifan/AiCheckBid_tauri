@@ -1,0 +1,13 @@
+{
+  "samples": [
+    {
+      "file": "xinhan.pdf",
+      "issueCount": 208
+    },
+    {
+      "file": "jialin.pdf",
+      "issueCount": 671
+    }
+  ],
+  "tolerance": 0
+}

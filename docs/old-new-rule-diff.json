@@ -1,0 +1,72 @@
+﻿[
+    {
+        "sample":  "jialin",
+        "rule":  "右边距",
+        "oldCount":  0,
+        "newCount":  297,
+        "diff":  297
+    },
+    {
+        "sample":  "jialin",
+        "rule":  "左边距",
+        "oldCount":  0,
+        "newCount":  297,
+        "diff":  297
+    },
+    {
+        "sample":  "jialin",
+        "rule":  "字体",
+        "oldCount":  0,
+        "newCount":  17,
+        "diff":  17
+    },
+    {
+        "sample":  "jialin",
+        "rule":  "下边距",
+        "oldCount":  0,
+        "newCount":  8,
+        "diff":  8
+    },
+    {
+        "sample":  "jialin",
+        "rule":  "字号",
+        "oldCount":  0,
+        "newCount":  8,
+        "diff":  8
+    },
+    {
+        "sample":  "xinhan",
+        "rule":  "右边距",
+        "oldCount":  0,
+        "newCount":  74,
+        "diff":  74
+    },
+    {
+        "sample":  "xinhan",
+        "rule":  "左边距",
+        "oldCount":  0,
+        "newCount":  74,
+        "diff":  74
+    },
+    {
+        "sample":  "xinhan",
+        "rule":  "字体",
+        "oldCount":  0,
+        "newCount":  21,
+        "diff":  21
+    },
+    {
+        "sample":  "xinhan",
+        "rule":  "字号",
+        "oldCount":  0,
+        "newCount":  12,
+        "diff":  12
+    },
+    {
+        "sample":  "xinhan",
+        "rule":  "下边距",
+        "oldCount":  0,
+        "newCount":  3,
+        "diff":  3
+    }
+]

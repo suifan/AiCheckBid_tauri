@@ -1,0 +1,839 @@
+﻿[
+    {
+        "section":  "检查项",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  false,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MISSING_IN_NEW"
+    },
+    {
+        "section":  "页面",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "页面",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "页面",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "页面",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  false,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MISSING_IN_NEW"
+    },
+    {
+        "section":  "页面",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  false,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MISSING_IN_NEW"
+    },
+    {
+        "section":  "页面",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "页面",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "页面",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  false,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MISSING_IN_NEW"
+    },
+    {
+        "section":  "页面",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  false,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MISSING_IN_NEW"
+    },
+    {
+        "section":  "页面",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  false,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MISSING_IN_NEW"
+    },
+    {
+        "section":  "页面",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  false,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MISSING_IN_NEW"
+    },
+    {
+        "section":  "检查项",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "页面",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  false,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MISSING_IN_NEW"
+    },
+    {
+        "section":  "页面",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  false,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MISSING_IN_NEW"
+    },
+    {
+        "section":  "正文",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "正文",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "一级标题",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  false,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MISSING_IN_NEW"
+    },
+    {
+        "section":  "一级标题",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  false,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MISSING_IN_NEW"
+    },
+    {
+        "section":  "一级标题",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  false,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MISSING_IN_NEW"
+    },
+    {
+        "section":  "一级标题",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  false,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MISSING_IN_NEW"
+    },
+    {
+        "section":  "二级标题",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  false,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MISSING_IN_NEW"
+    },
+    {
+        "section":  "二级标题",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  false,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MISSING_IN_NEW"
+    },
+    {
+        "section":  "二级标题",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  false,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MISSING_IN_NEW"
+    },
+    {
+        "section":  "二级标题",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  false,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MISSING_IN_NEW"
+    },
+    {
+        "section":  "三级标题",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  false,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MISSING_IN_NEW"
+    },
+    {
+        "section":  "三级标题",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  false,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MISSING_IN_NEW"
+    },
+    {
+        "section":  "三级标题",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  false,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MISSING_IN_NEW"
+    },
+    {
+        "section":  "三级标题",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  false,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MISSING_IN_NEW"
+    },
+    {
+        "section":  "四级标题",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  false,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MISSING_IN_NEW"
+    },
+    {
+        "section":  "四级标题",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  false,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MISSING_IN_NEW"
+    },
+    {
+        "section":  "四级标题",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  false,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MISSING_IN_NEW"
+    },
+    {
+        "section":  "四级标题",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  false,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MISSING_IN_NEW"
+    },
+    {
+        "section":  "五级标题",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  false,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MISSING_IN_NEW"
+    },
+    {
+        "section":  "五级标题",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  false,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MISSING_IN_NEW"
+    },
+    {
+        "section":  "五级标题",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  false,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MISSING_IN_NEW"
+    },
+    {
+        "section":  "五级标题",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  false,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MISSING_IN_NEW"
+    },
+    {
+        "section":  "六级标题",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  false,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MISSING_IN_NEW"
+    },
+    {
+        "section":  "六级标题",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  false,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MISSING_IN_NEW"
+    },
+    {
+        "section":  "六级标题",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  false,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MISSING_IN_NEW"
+    },
+    {
+        "section":  "六级标题",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  false,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MISSING_IN_NEW"
+    },
+    {
+        "section":  "七级标题",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  false,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MISSING_IN_NEW"
+    },
+    {
+        "section":  "七级标题",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  false,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MISSING_IN_NEW"
+    },
+    {
+        "section":  "七级标题",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  false,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MISSING_IN_NEW"
+    },
+    {
+        "section":  "七级标题",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  false,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MISSING_IN_NEW"
+    },
+    {
+        "section":  "检查项",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "检查项",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "检查项",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "检查项",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "检查项",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "检查项",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  false,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MISSING_IN_NEW"
+    },
+    {
+        "section":  "检查项",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "检查项",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "正文",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "检查项",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "表格",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "表格",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  false,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MISSING_IN_NEW"
+    },
+    {
+        "section":  "检查项",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "检查项",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "检查项",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "标题",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "正文",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  false,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MISSING_IN_NEW"
+    },
+    {
+        "section":  "标题",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  false,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MISSING_IN_NEW"
+    },
+    {
+        "section":  "正文",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  false,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MISSING_IN_NEW"
+    },
+    {
+        "section":  "正文",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "正文",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "正文",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "表格",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  false,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MISSING_IN_NEW"
+    },
+    {
+        "section":  "表格",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  false,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MISSING_IN_NEW"
+    },
+    {
+        "section":  "表格",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "表格",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "表格",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "表格",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "表格",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "表格",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  true,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MATCHED"
+    },
+    {
+        "section":  "检查项",
+        "rule":  "",
+        "oldImplemented":  true,
+        "newImplemented":  false,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "MISSING_IN_NEW"
+    },
+    {
+        "section":  "页面",
+        "rule":  "",
+        "oldImplemented":  false,
+        "newImplemented":  true,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "ONLY_IN_NEW"
+    },
+    {
+        "section":  "页面",
+        "rule":  "",
+        "oldImplemented":  false,
+        "newImplemented":  true,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "ONLY_IN_NEW"
+    },
+    {
+        "section":  "检查项",
+        "rule":  "",
+        "oldImplemented":  false,
+        "newImplemented":  true,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "ONLY_IN_NEW"
+    },
+    {
+        "section":  "检查项",
+        "rule":  "",
+        "oldImplemented":  false,
+        "newImplemented":  true,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "ONLY_IN_NEW"
+    },
+    {
+        "section":  "检查项",
+        "rule":  "",
+        "oldImplemented":  false,
+        "newImplemented":  true,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "ONLY_IN_NEW"
+    },
+    {
+        "section":  "检查项",
+        "rule":  "",
+        "oldImplemented":  false,
+        "newImplemented":  true,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "ONLY_IN_NEW"
+    },
+    {
+        "section":  "检查项",
+        "rule":  "",
+        "oldImplemented":  false,
+        "newImplemented":  true,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "ONLY_IN_NEW"
+    },
+    {
+        "section":  "检查项",
+        "rule":  "",
+        "oldImplemented":  false,
+        "newImplemented":  true,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "ONLY_IN_NEW"
+    },
+    {
+        "section":  "检查项",
+        "rule":  "",
+        "oldImplemented":  false,
+        "newImplemented":  true,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "ONLY_IN_NEW"
+    },
+    {
+        "section":  "检查项",
+        "rule":  "",
+        "oldImplemented":  false,
+        "newImplemented":  true,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "ONLY_IN_NEW"
+    },
+    {
+        "section":  "检查项",
+        "rule":  "",
+        "oldImplemented":  false,
+        "newImplemented":  true,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "ONLY_IN_NEW"
+    },
+    {
+        "section":  "检查项",
+        "rule":  "",
+        "oldImplemented":  false,
+        "newImplemented":  true,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "ONLY_IN_NEW"
+    },
+    {
+        "section":  "检查项",
+        "rule":  "",
+        "oldImplemented":  false,
+        "newImplemented":  true,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "ONLY_IN_NEW"
+    },
+    {
+        "section":  "检查项",
+        "rule":  "",
+        "oldImplemented":  false,
+        "newImplemented":  true,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "ONLY_IN_NEW"
+    },
+    {
+        "section":  "检查项",
+        "rule":  "",
+        "oldImplemented":  false,
+        "newImplemented":  true,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "ONLY_IN_NEW"
+    },
+    {
+        "section":  "检查项",
+        "rule":  "",
+        "oldImplemented":  false,
+        "newImplemented":  true,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "ONLY_IN_NEW"
+    },
+    {
+        "section":  "检查项",
+        "rule":  "",
+        "oldImplemented":  false,
+        "newImplemented":  true,
+        "net48":  true,
+        "net8":  true,
+        "parity":  "ONLY_IN_NEW"
+    }
+]
