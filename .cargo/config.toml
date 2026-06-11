@@ -3,3 +3,13 @@ replace-with = "rsproxy"
 
 [source.rsproxy]
 registry = "sparse+https://rsproxy.cn/index/"
+
+[build]
+jobs = 1
+rustflags = ["-C", "codegen-units=1", "-C", "debuginfo=0"]
+
+[profile.dev]
+incremental = false
+
+[profile.release]
+incremental = false

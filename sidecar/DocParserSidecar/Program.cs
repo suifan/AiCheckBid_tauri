@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using DocumentFormat.OpenXml;
@@ -8,6 +9,7 @@ using Spire.Doc;
 using UglyToad.PdfPig;
 
 var request = ParseRequest(args);
+ReportProgress("正在初始化检查任务");
 
 var response = new ParseDocumentResponse
 {
@@ -27,16 +29,19 @@ if (string.IsNullOrWhiteSpace(request.FilePath) || !File.Exists(request.FilePath
     return;
 }
 
+ReportProgress("正在读取规则配置");
 var ruleBook = LoadRuleBook(request, response);
 response.OutputPageNumber = ruleBook.GetBool("检查项", "输出页码", true);
 response.CommentMarker = ruleBook.Get("检查项", "批注标记");
 
 if (response.FileType is "doc" or "docx")
 {
+    ReportProgress("正在分析 Word 文档");
     TryParseWord(request.FilePath!, response, ruleBook);
 }
 else if (response.FileType is "pdf")
 {
+    ReportProgress("正在分析 PDF 文档");
     TryParsePdf(request.FilePath!, response, ruleBook);
 }
 else
@@ -45,8 +50,14 @@ else
 }
 
 response.Issues = NormalizeIssues(DeduplicateIssues(response.Issues));
-FinalizeReportArtifacts(response);
+ReportProgress("正在整理检查结果");
+FinalizeReportArtifacts(response, request.BatchSerial ?? 1, request.OverviewMode);
 Console.WriteLine(JsonSerializer.Serialize(response));
+
+static void ReportProgress(string message)
+{
+    Console.Error.WriteLine($"PROGRESS|{message}");
+}
 
 static RuleBook LoadRuleBook(ParseDocumentRequest request, ParseDocumentResponse response)
 {
@@ -118,6 +129,7 @@ static void TryParseWord(string path, ParseDocumentResponse response, RuleBook r
 {
     try
     {
+        ReportProgress("正在读取 Word 页数与基础统计");
         using var doc = new Spire.Doc.Document();
         doc.LoadFromFile(path);
 
@@ -143,6 +155,7 @@ static void TryParseWord(string path, ParseDocumentResponse response, RuleBook r
         // Spire 在当前环境仅用于统计，规则计算统一走 OpenXML（可复刻原逻辑并避免兼容问题）。
         if (path.EndsWith(".docx", StringComparison.OrdinalIgnoreCase))
         {
+            ReportProgress("正在分析正文、标题与表格");
             TryParseDocxWithOpenXml(path, response, rules);
         }
     }
@@ -160,6 +173,7 @@ static void TryParsePdf(string path, ParseDocumentResponse response, RuleBook ru
 {
     try
     {
+        ReportProgress("正在打开 PDF 文档");
         using var pdf = PdfDocument.Open(path);
         response.Parser = "dotnet-sidecar-v3-pdfpig-rules";
         response.PageCount = pdf.NumberOfPages;
@@ -218,6 +232,7 @@ static void TryParsePdf(string path, ParseDocumentResponse response, RuleBook ru
         {
             try
             {
+                ReportProgress($"正在分析 PDF 第{i}/{pdf.NumberOfPages}页");
                 var page = pdf.GetPage(i);
                 var pageWords = page.GetWords().ToList();
                 totalWords += pageWords.Count;
@@ -889,7 +904,7 @@ static int DetectPdfHeadingLevel(string line, RuleBook rules, out string prefix)
     for (var level = 1; level <= 7; level++)
     {
         var section = $"{ChineseLevelName(level)}标题";
-        var pattern = rules.Get(section, "标题规则");
+        var pattern = rules.ResolveTitlePattern(rules.Get(section, "标题规则"));
         if (string.IsNullOrWhiteSpace(pattern))
         {
             continue;
@@ -1605,6 +1620,7 @@ static void TryParseDocxWithOpenXml(string path, ParseDocumentResponse response,
 {
     try
     {
+        ReportProgress("正在加载 OpenXML 结构");
         using var doc = WordprocessingDocument.Open(path, false);
         var body = doc.MainDocumentPart?.Document?.Body;
         if (body is null)
@@ -1626,10 +1642,15 @@ static void TryParseDocxWithOpenXml(string path, ParseDocumentResponse response,
             MarginsCm = GetMargins(sectionProps.FirstOrDefault())
         };
 
+        ReportProgress("正在检查页面规则");
         CheckPageRules(sectionProps.FirstOrDefault(), rules, response.Issues);
+        ReportProgress("正在检查正文格式");
         CheckParagraphRules(paragraphs, rules, response.Issues);
+        ReportProgress("正在检查表格规则");
         CheckTableRules(tables, rules, response.Issues);
+        ReportProgress("正在检查彩色图片");
         CheckColorImageRules(doc, rules, response.Issues);
+        ReportProgress("正在检查通用项目");
         CheckGeneralChecks(paragraphs, rules, response.Issues);
     }
     catch (Exception ex)
@@ -2399,15 +2420,30 @@ static string DetectFileType(string? filePath)
     };
 }
 
-static void FinalizeReportArtifacts(ParseDocumentResponse response)
+static void FinalizeReportArtifacts(ParseDocumentResponse response, int batchSerial, string? overviewMode)
 {
+    var resultDir = ResolveResultDir(response.FilePath);
+    Directory.CreateDirectory(resultDir);
+
+    try
+    {
+        WriteLegacySourceCopy(response.FilePath, resultDir);
+    }
+    catch (Exception ex)
+    {
+        response.Warnings.Add($"结果副本写入失败: {ex.Message}");
+    }
+
+    ReportProgress("正在生成文本报告");
     response.ReportText = BuildReportText(response);
 
     try
     {
-        var reportPath = WriteReportFile(response);
+        var reportPath = WriteReportFile(response, resultDir);
         response.ReportPath = reportPath;
-        WriteLegacySectionFiles(response, reportPath);
+        WriteLegacySectionFiles(response, resultDir, batchSerial);
+        var sourceName = Path.GetFileNameWithoutExtension(response.FilePath);
+        WriteLegacyOverviewFile(resultDir, string.IsNullOrWhiteSpace(sourceName) ? "document" : sourceName, batchSerial, overviewMode);
     }
     catch (Exception ex)
     {
@@ -2416,7 +2452,8 @@ static void FinalizeReportArtifacts(ParseDocumentResponse response)
 
     try
     {
-        var reportDocxPath = WriteReportDocxFile(response);
+        ReportProgress("正在生成 DOCX 报告");
+        var reportDocxPath = WriteReportDocxFile(response, resultDir);
         response.ReportDocxPath = reportDocxPath;
     }
     catch (Exception ex)
@@ -2599,14 +2636,8 @@ static Dictionary<string, List<RuleIssue>> GroupIssuesByLegacySection(List<RuleI
         .ToDictionary(g => g.Key, g => g.ToList(), StringComparer.OrdinalIgnoreCase);
 }
 
-static void WriteLegacySectionFiles(ParseDocumentResponse response, string reportPath)
+static void WriteLegacySectionFiles(ParseDocumentResponse response, string resultDir, int batchSerial)
 {
-    var dir = Path.GetDirectoryName(reportPath);
-    if (string.IsNullOrWhiteSpace(dir))
-    {
-        return;
-    }
-
     var grouped = GroupIssuesByLegacySection(response.Issues);
     var sourceName = Path.GetFileNameWithoutExtension(response.FilePath);
     if (string.IsNullOrWhiteSpace(sourceName))
@@ -2626,13 +2657,13 @@ static void WriteLegacySectionFiles(ParseDocumentResponse response, string repor
             foreach (var issue in list)
             {
                 var content = !string.IsNullOrWhiteSpace(issue.Snippet) ? issue.Snippet! : issue.CurrentValue;
-                var location = response.OutputPageNumber ? issue.Location : string.Empty;
+                var location = response.OutputPageNumber ? NormalizeLegacyLocation(issue.Location) : string.Empty;
                 var message = ApplyCommentMarker(issue.Message, response.CommentMarker);
                 body.AppendLine(FormatLegacyReportRow(location, message, content));
             }
         }
 
-        var sectionPath = Path.Combine(dir, $"{sourceName}-{section}.txt");
+        var sectionPath = Path.Combine(resultDir, $"{batchSerial}的{section}.txt");
         File.WriteAllText(sectionPath, body.ToString(), new UTF8Encoding(false));
     }
 }
@@ -2652,6 +2683,17 @@ static string FormatLegacyReportRow(string location, string message, string cont
     }
 
     return $"{location}\t{message}\t未处理\t{content}\t";
+}
+
+static string NormalizeLegacyLocation(string location)
+{
+    if (string.IsNullOrWhiteSpace(location))
+    {
+        return string.Empty;
+    }
+
+    var match = Regex.Match(location, @"P\d+");
+    return match.Success ? match.Value : string.Empty;
 }
 
 static string MapIssueToLegacySection(RuleIssue issue)
@@ -2689,38 +2731,150 @@ static string MapIssueToLegacySection(RuleIssue issue)
     return "其他检查结果";
 }
 
-static string WriteReportFile(ParseDocumentResponse response)
+static void WriteLegacySourceCopy(string sourcePath, string resultDir)
 {
-    var sourcePath = response.FilePath;
-    var sourceDir = ResolveReportRootDir(sourcePath);
-    if (string.IsNullOrWhiteSpace(sourceDir))
+    if (string.IsNullOrWhiteSpace(sourcePath) || !File.Exists(sourcePath))
     {
-        sourceDir = Directory.GetCurrentDirectory();
+        return;
     }
 
-    var resultDir = Path.Combine(sourceDir, "result");
-    Directory.CreateDirectory(resultDir);
-
     var sourceName = Path.GetFileNameWithoutExtension(sourcePath);
-    var reportPath = Path.Combine(resultDir, $"{sourceName}-检查结果.txt");
+    if (string.IsNullOrWhiteSpace(sourceName))
+    {
+        sourceName = "document";
+    }
+    var targetPath = Path.Combine(resultDir, $"{sourceName}m{Path.GetExtension(sourcePath)}");
+    if (string.Equals(Path.GetFullPath(sourcePath), Path.GetFullPath(targetPath), StringComparison.OrdinalIgnoreCase))
+    {
+        return;
+    }
+    File.Copy(sourcePath, targetPath, true);
+}
+
+static void WriteLegacyOverviewFile(string resultDir, string sourceName, int batchSerial, string? overviewMode)
+{
+    if (!Directory.Exists(resultDir))
+    {
+        return;
+    }
+
+    var sb = new StringBuilder();
+    sb.Append(batchSerial);
+    sb.Append('\t');
+    sb.Append(sourceName);
+    sb.Append("m\t");
+    sb.Append(batchSerial);
+    sb.Append("的格式检查结果\t");
+    sb.Append(batchSerial);
+    sb.Append("的公司名检查结果\t");
+    sb.Append(batchSerial);
+    sb.Append("的地名检查结果\t");
+    sb.Append(batchSerial);
+    sb.Append("的人名检查结果\t");
+    sb.Append(batchSerial);
+    sb.Append("的敏感词检查结果\t");
+    sb.Append(batchSerial);
+    sb.Append("的标点符号检查结果\t");
+    sb.Append(batchSerial);
+    sb.AppendLine("的其他检查结果");
+
+    var overviewPath = Path.Combine(resultDir, "检查结果概要.txt");
+    if (string.Equals(overviewMode, "append", StringComparison.OrdinalIgnoreCase) && File.Exists(overviewPath))
+    {
+        File.AppendAllText(overviewPath, sb.ToString(), new UTF8Encoding(false));
+    }
+    else
+    {
+        File.WriteAllText(overviewPath, sb.ToString(), new UTF8Encoding(false));
+    }
+}
+
+static string WriteReportFile(ParseDocumentResponse response, string resultDir)
+{
+    var sourceName = Path.GetFileNameWithoutExtension(response.FilePath);
+    var reportPath = Path.Combine(resultDir, $"检查结果-{sourceName}m.txt");
     File.WriteAllText(reportPath, response.ReportText ?? string.Empty, new UTF8Encoding(false));
     return reportPath;
 }
 
-static string WriteReportDocxFile(ParseDocumentResponse response)
+static string LegacyCheckTypeLabel(string section)
 {
-    var sourcePath = response.FilePath;
-    var sourceDir = ResolveReportRootDir(sourcePath);
-    if (string.IsNullOrWhiteSpace(sourceDir))
+    return section.EndsWith("结果", StringComparison.OrdinalIgnoreCase)
+        ? section[..^2]
+        : section;
+}
+
+static Paragraph CreateLegacyParagraph(string text, bool bold = false)
+{
+    var run = new Run();
+    if (bold)
     {
-        sourceDir = Directory.GetCurrentDirectory();
+        run.RunProperties = new RunProperties(new Bold());
+    }
+    run.Append(new Text(text ?? string.Empty) { Space = SpaceProcessingModeValues.Preserve });
+    return new Paragraph(run);
+}
+
+static DocumentFormat.OpenXml.Wordprocessing.TableCell CreateLegacyCell(string text, string width, bool bold = false)
+{
+    var cell = new DocumentFormat.OpenXml.Wordprocessing.TableCell(CreateLegacyParagraph(text, bold));
+    cell.TableCellProperties = new TableCellProperties(
+        new TableCellWidth { Type = TableWidthUnitValues.Pct, Width = width },
+        new TableCellVerticalAlignment { Val = TableVerticalAlignmentValues.Center }
+    );
+    return cell;
+}
+
+static DocumentFormat.OpenXml.Wordprocessing.TableRow CreateLegacyRow(string col1, string col2, string col3, string col4, bool bold = false)
+{
+    var row = new DocumentFormat.OpenXml.Wordprocessing.TableRow();
+    row.Append(
+        CreateLegacyCell(col1, "900", bold),
+        CreateLegacyCell(col2, "2200", bold),
+        CreateLegacyCell(col3, "900", bold),
+        CreateLegacyCell(col4, "2000", bold)
+    );
+    return row;
+}
+
+static DocumentFormat.OpenXml.Wordprocessing.Table CreateLegacySectionTable(ParseDocumentResponse response, string sourceName, string section, List<RuleIssue> issues)
+{
+    var table = new DocumentFormat.OpenXml.Wordprocessing.Table();
+    table.AppendChild(new TableProperties(
+        new TableWidth { Type = TableWidthUnitValues.Pct, Width = "6000" },
+        new TableBorders(
+            new TopBorder { Val = BorderValues.Single, Size = 8U },
+            new BottomBorder { Val = BorderValues.Single, Size = 8U },
+            new LeftBorder { Val = BorderValues.Single, Size = 8U },
+            new RightBorder { Val = BorderValues.Single, Size = 8U },
+            new InsideHorizontalBorder { Val = BorderValues.Single, Size = 8U },
+            new InsideVerticalBorder { Val = BorderValues.Single, Size = 8U }
+        )
+    ));
+
+    table.Append(CreateLegacyRow("文件名", $"{sourceName}m", "检查类型", LegacyCheckTypeLabel(section), true));
+    table.Append(CreateLegacyRow(response.OutputPageNumber ? "页码" : "位置", "问题详情", "处理结果", "原文内容", true));
+
+    if (issues.Count == 0)
+    {
+        table.Append(CreateLegacyRow(string.Empty, "未发现问题。", string.Empty, string.Empty));
+        return table;
     }
 
-    var resultDir = Path.Combine(sourceDir, "result");
-    Directory.CreateDirectory(resultDir);
+    foreach (var issue in issues)
+    {
+        var location = response.OutputPageNumber ? NormalizeLegacyLocation(issue.Location) : string.Empty;
+        var message = ApplyCommentMarker(issue.Message, response.CommentMarker);
+        var content = !string.IsNullOrWhiteSpace(issue.Snippet) ? issue.Snippet! : issue.CurrentValue;
+        table.Append(CreateLegacyRow(location, message, "未处理", content));
+    }
+    return table;
+}
 
-    var sourceName = Path.GetFileNameWithoutExtension(sourcePath);
-    var reportDocxPath = Path.Combine(resultDir, $"{sourceName}-检查结果.docx");
+static string WriteReportDocxFile(ParseDocumentResponse response, string resultDir)
+{
+    var sourceName = Path.GetFileNameWithoutExtension(response.FilePath);
+    var reportDocxPath = Path.Combine(resultDir, $"检查结果-{sourceName}m.docx");
 
     using var doc = WordprocessingDocument.Create(reportDocxPath, WordprocessingDocumentType.Document);
     var main = doc.AddMainDocumentPart();
@@ -2729,11 +2883,13 @@ static string WriteReportDocxFile(ParseDocumentResponse response)
     );
     var body = main.Document.Body!;
 
-    var reportText = response.ReportText ?? string.Empty;
-    foreach (var line in reportText.Split('\n'))
+    var grouped = GroupIssuesByLegacySection(response.Issues);
+    foreach (var section in GetLegacySections())
     {
-        var p = new Paragraph(new Run(new Text(line.TrimEnd('\r'))));
-        body.AppendChild(p);
+        body.AppendChild(CreateLegacyParagraph(section, true));
+        var issues = grouped.TryGetValue(section, out var list) ? list : new List<RuleIssue>();
+        body.AppendChild(CreateLegacySectionTable(response, sourceName, section, issues));
+        body.AppendChild(CreateLegacyParagraph(string.Empty));
     }
 
     main.Document.Save();
@@ -2757,6 +2913,23 @@ static string? ResolveReportRootDir(string? sourcePath)
     return sourceDir;
 }
 
+static string ResolveResultDir(string? sourcePath)
+{
+    var configured = Environment.GetEnvironmentVariable("AICHECKBID_RESULT_DIR");
+    if (!string.IsNullOrWhiteSpace(configured))
+    {
+        return configured.Trim();
+    }
+
+    var sourceDir = ResolveReportRootDir(sourcePath);
+    if (string.IsNullOrWhiteSpace(sourceDir))
+    {
+        sourceDir = Directory.GetCurrentDirectory();
+    }
+
+    return Path.Combine(sourceDir, "result");
+}
+
 public sealed class ParseDocumentRequest
 {
     [JsonPropertyName("filePath")]
@@ -2764,6 +2937,15 @@ public sealed class ParseDocumentRequest
 
     [JsonPropertyName("rulesPath")]
     public string? RulesPath { get; set; }
+
+    [JsonPropertyName("batchSerial")]
+    public int? BatchSerial { get; set; }
+
+    [JsonPropertyName("batchTotal")]
+    public int? BatchTotal { get; set; }
+
+    [JsonPropertyName("overviewMode")]
+    public string? OverviewMode { get; set; }
 }
 
 public sealed class ParseDocumentResponse
@@ -2874,6 +3056,7 @@ public sealed class PageMarginsCm
 public sealed class RuleBook
 {
     private readonly Dictionary<string, Dictionary<string, string>> _data = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, string> _titlePatterns = new(StringComparer.OrdinalIgnoreCase);
 
     public static RuleBook Parse(string path)
     {
@@ -2910,6 +3093,7 @@ public sealed class RuleBook
             rb._data[section][key] = value;
         }
 
+        rb.LoadTitlePresets(path);
         return rb;
     }
 
@@ -2949,6 +3133,89 @@ public sealed class RuleBook
     {
         var value = Get(section, key);
         return float.TryParse(value, out var f) ? f : 0f;
+    }
+
+    public string ResolveTitlePattern(string raw)
+    {
+        if (string.IsNullOrWhiteSpace(raw))
+        {
+            return string.Empty;
+        }
+
+        var value = raw.Trim();
+        if (value.Contains("^") || value.Contains("(") || value.Contains("[") || value.Contains(@"\d"))
+        {
+            return value;
+        }
+
+        if (_titlePatterns.TryGetValue(value, out var mapped) && !string.IsNullOrWhiteSpace(mapped))
+        {
+            return mapped;
+        }
+
+        return value;
+    }
+
+    private void LoadTitlePresets(string rulesPath)
+    {
+        foreach (var path in GetTitlePresetCandidates(rulesPath))
+        {
+            if (!File.Exists(path))
+            {
+                continue;
+            }
+
+            var content = ReadTextSmart(path);
+            foreach (var rawLine in content.Split('\n'))
+            {
+                var line = rawLine.Trim().TrimEnd('\r');
+                if (string.IsNullOrWhiteSpace(line) || line.StartsWith(';') || line.StartsWith('#'))
+                {
+                    continue;
+                }
+
+                var parts = line.Split("*****", StringSplitOptions.None);
+                if (parts.Length < 2)
+                {
+                    continue;
+                }
+
+                var label = parts[0].Trim();
+                var pattern = parts[1].Trim();
+                if (!string.IsNullOrWhiteSpace(label) && !string.IsNullOrWhiteSpace(pattern))
+                {
+                    _titlePatterns[label] = pattern;
+                }
+            }
+
+            if (_titlePatterns.Count > 0)
+            {
+                return;
+            }
+        }
+    }
+
+    private static IEnumerable<string> GetTitlePresetCandidates(string rulesPath)
+    {
+        var candidates = new List<string>();
+        if (!string.IsNullOrWhiteSpace(rulesPath))
+        {
+            var dir = Path.GetDirectoryName(rulesPath);
+            if (!string.IsNullOrWhiteSpace(dir))
+            {
+                candidates.Add(Path.Combine(dir, "title-presets.txt"));
+            }
+        }
+
+        var appBase = AppContext.BaseDirectory;
+        var cwd = Directory.GetCurrentDirectory();
+        candidates.Add(Path.Combine(appBase, "rules", "title-presets.txt"));
+        candidates.Add(Path.Combine(appBase, "resources", "rules", "title-presets.txt"));
+        candidates.Add(Path.Combine(cwd, "rules", "title-presets.txt"));
+        candidates.Add(Path.Combine(cwd, "title-presets.txt"));
+        candidates.Add(Path.Combine(cwd, "..", "rules", "title-presets.txt"));
+
+        return candidates.Distinct(StringComparer.OrdinalIgnoreCase);
     }
 
     private static string ReadTextSmart(string path)

@@ -13,7 +13,8 @@
     "allowlist": {
       "all": false,
       "dialog": {
-        "open": true
+        "open": true,
+        "confirm": true
       }
     },
     "bundle": {
@@ -21,11 +22,9 @@
       "identifier": "com.aicheckbid.next",
       "targets": "all",
       "resources": [
-        "../rules/set.ini",
-        "../rules/title-presets.txt",
-        "../sidecar/DocParserSidecar/DocParserSidecar.csproj",
-        "../sidecar/DocParserSidecar/**/*.cs",
-        "../sidecar/DocParserSidecarNet48/bin/Debug/**"
+        "../rules/**/*",
+        "../sidecar/DocParserSidecar/bin/**/*",
+        "../sidecar/DocParserSidecarNet48/bin/**/*"
       ],
       "icon": [
         "icons/icon.ico"

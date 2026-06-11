@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿:root {
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿:root {
   font-family: "Microsoft YaHei", "Segoe UI", sans-serif;
 }
 
@@ -78,6 +78,11 @@ body {
   line-height: 22px;
 }
 
+.mini-value {
+  min-width: 88px;
+  text-align: center;
+}
+
 .legacy-root input,
 .legacy-root select {
   border: 1px solid #94b5de;
@@ -114,6 +119,19 @@ body {
   font-weight: 700;
   cursor: pointer;
   min-height: 30px;
+}
+
+.mini-link {
+  border: none;
+  background: transparent;
+  color: #0b4da2;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+}
+
+.mini-btn.active {
+  background: #0b4da2;
 }
 
 .tab-btn {
@@ -450,6 +468,173 @@ body {
 .panel-lite {
   margin-top: 8px;
   padding: 8px;
+}
+
+.compat-panel details {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.compat-panel summary {
+  cursor: pointer;
+  color: #0b4da2;
+  font-weight: 700;
+}
+
+.compat-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.path-box {
+  flex: 1;
+  min-width: 320px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.result-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.history-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.result-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.result-meta {
+  color: #0b4da2;
+  font-weight: 700;
+}
+
+.warning-box {
+  border: 1px solid #f59e0b;
+  background: #fff7ed;
+  color: #9a3412;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.history-layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 8px;
+}
+
+.history-list {
+  border: 1px solid #86a4d2;
+  background: #f8fbff;
+  max-height: 320px;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.history-item {
+  border: none;
+  border-bottom: 1px solid #dbe7fb;
+  background: transparent;
+  padding: 8px 10px;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.history-item:hover {
+  background: #eef4ff;
+}
+
+.history-item.active {
+  background: #d7e8ff;
+}
+
+.history-item span {
+  color: #0b4da2;
+  font-weight: 700;
+}
+
+.history-item em {
+  font-style: normal;
+  color: #64748b;
+  font-size: 12px;
+}
+
+.history-preview {
+  border: 1px solid #86a4d2;
+  background: #fff;
+  padding: 8px;
+  min-height: 240px;
+}
+
+.history-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+  color: #0b4da2;
+  font-weight: 700;
+  flex-wrap: wrap;
+}
+
+.history-text {
+  margin-top: 0;
+  max-height: 280px;
+  overflow: auto;
+}
+
+.issue-table-wrap {
+  max-height: 280px;
+  overflow: auto;
+  border: 1px solid #86a4d2;
+}
+
+.issue-table th:nth-child(1),
+.issue-table td:nth-child(1) {
+  width: 110px;
+}
+
+.issue-table th:nth-child(2),
+.issue-table td:nth-child(2) {
+  width: 110px;
+}
+
+.issue-table th:nth-child(3),
+.issue-table td:nth-child(3) {
+  width: 100px;
+}
+
+.issue-table th:nth-child(4),
+.issue-table td:nth-child(4) {
+  width: 38%;
+}
+
+.issue-table th:nth-child(5),
+.issue-table td:nth-child(5) {
+  width: 20%;
+}
+
+.issue-table th:nth-child(6),
+.issue-table td:nth-child(6) {
+  width: 20%;
 }
 
 .legacy-footer {

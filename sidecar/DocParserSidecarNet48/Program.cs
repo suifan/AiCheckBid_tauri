@@ -22,6 +22,7 @@ namespace DocParserSidecarNet48
             {
                 var filePath = args.Length > 0 ? args[0] : string.Empty;
                 var rulesPath = args.Length > 1 ? args[1] : string.Empty;
+                ReportProgress("正在初始化检查任务");
 
                 var response = new ParseDocumentResponse
                 {
@@ -39,14 +40,19 @@ namespace DocParserSidecarNet48
                     return 0;
                 }
 
+                ReportProgress("正在读取规则配置");
                 var rules = RuleBook.Load(rulesPath, response.warnings);
                 response.outputPageNumber = rules.GetBool("检查项", "输出页码", true);
                 response.commentMarker = rules.Get("检查项", "批注标记");
+                response.smartFixEnabled = rules.GetBool("检查项", "智能修正", false);
                 if (response.fileType == "doc" || response.fileType == "docx")
                 {
+                    ReportProgress("正在分析 Word 文档");
                     CheckWord(filePath, rules, response);
+                    ReportProgress("正在生成文本报告");
                     response.reportText = BuildReportText(response);
                     response.reportPath = WriteReportFile(response);
+                    ReportProgress("正在生成 DOCX 报告");
                     response.reportDocxPath = WriteReportDocxFile(response);
                 }
                 else
@@ -66,6 +72,7 @@ namespace DocParserSidecarNet48
 
         private static void CheckWord(string path, RuleBook rules, ParseDocumentResponse response)
         {
+            ReportProgress("正在加载 Word 文档");
             var doc = new Document();
             doc.LoadFromFile(path);
 
@@ -96,13 +103,323 @@ namespace DocParserSidecarNet48
                 };
             }
 
-            CheckPage(doc, rules, response.issues);
-            CheckPageAdvanced(doc, rules, response.issues);
-            CheckCoverRules(doc, rules, response.issues);
-            CheckColorImages(doc, rules, response.issues);
-            CheckParagraphs(doc, rules, response.issues);
-            CheckHeadingRules(doc, rules, response.issues);
-            CheckTables(doc, rules, response.issues);
+            ReportProgress("正在按原版口径检查 Word");
+            CheckWordLegacyParity(doc, path, rules, response);
+            SaveSmartFixedCopy(doc, path, response);
+        }
+
+        private static void CheckWordLegacyParity(Document doc, string path, RuleBook rules, ParseDocumentResponse response)
+        {
+            if (doc == null || rules == null || response == null)
+            {
+                return;
+            }
+
+            var text = ExtractLegacyWordText(doc);
+            var sections = new LegacyWordSections();
+            sections.format = string.Format("页数：{0}；字符数：{1}。", response.pageCount ?? doc.PageCount, text.Length);
+
+            var placeWords = LoadLegacyWordList(
+                rules,
+                "词典1.doc",
+                rules.Get("检查项", "地名词典"),
+                rules.Get("检查项", "地名列表"),
+                rules.Get("检查项", "地名"),
+                rules.Get("检查项", "地名库")
+            );
+            sections.place = ScanLegacyWordList(
+                text,
+                placeWords,
+                "存在地名：{0}。",
+                rules.GetBool("检查项", "地名检查", true),
+                response.issues,
+                "地名检查"
+            );
+
+            var companyWords = LoadLegacyWordList(
+                rules,
+                "词典3.doc",
+                rules.Get("检查项", "公司名词典"),
+                rules.Get("检查项", "公司名列表"),
+                rules.Get("检查项", "公司名"),
+                rules.Get("检查项", "公司列表")
+            );
+            sections.company = ScanLegacyWordList(
+                text,
+                companyWords,
+                "存在公司名：{0}。",
+                rules.GetBool("检查项", "公司名检查", true),
+                response.issues,
+                "公司名检查"
+            );
+
+            sections.person = string.Empty;
+            sections.sensitive = ScanLegacySensitiveWords(text, rules, response.issues);
+            sections.punctuation = ScanLegacyPunctuation(
+                text,
+                LoadLegacyPunctuationSource(rules),
+                rules.GetBool("检查项", "标点检查", true),
+                response.issues
+            );
+            sections.other = string.Empty;
+            response.legacySections = sections;
+        }
+
+        private static string ExtractLegacyWordText(Document doc)
+        {
+            try
+            {
+                return (doc.GetText() ?? string.Empty).Trim();
+            }
+            catch
+            {
+                return string.Empty;
+            }
+        }
+
+        private static List<string> LoadLegacyWordList(RuleBook rules, string fileName, params string[] fallbacks)
+        {
+            var words = LoadLegacySetDocWords(rules, fileName);
+            if (words.Count > 0)
+            {
+                return words;
+            }
+            return SplitTerms(FirstNonEmpty(fallbacks));
+        }
+
+        private static List<string> LoadLegacySetDocWords(RuleBook rules, string fileName)
+        {
+            var result = new List<string>();
+            foreach (var path in GetLegacySetDocCandidates(rules, fileName))
+            {
+                if (!File.Exists(path))
+                {
+                    continue;
+                }
+
+                try
+                {
+                    using (var document = new Document())
+                    {
+                        document.LoadFromFile(path, FileFormat.Auto, "shuhuan123456");
+                        foreach (Section section in document.Sections)
+                        {
+                            foreach (Paragraph paragraph in section.Paragraphs)
+                            {
+                                var text = (paragraph.Text ?? string.Empty);
+                                foreach (var part in text.Split(new[] { '*', '；', ';' }, StringSplitOptions.RemoveEmptyEntries))
+                                {
+                                    var value = part.Trim();
+                                    if (!string.IsNullOrWhiteSpace(value))
+                                    {
+                                        result.Add(value);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                catch
+                {
+                }
+
+                if (result.Count > 0)
+                {
+                    return result;
+                }
+            }
+            return result;
+        }
+
+        private static string LoadLegacyPunctuationSource(RuleBook rules)
+        {
+            foreach (var path in GetLegacySetDocCandidates(rules, "词典4.doc"))
+            {
+                if (!File.Exists(path))
+                {
+                    continue;
+                }
+
+                try
+                {
+                    using (var document = new Document())
+                    {
+                        document.LoadFromFile(path, FileFormat.Auto, "shuhuan123456");
+                        var text = (document.GetText() ?? string.Empty).Trim();
+                        if (!string.IsNullOrWhiteSpace(text))
+                        {
+                            return text;
+                        }
+                    }
+                }
+                catch
+                {
+                }
+            }
+
+            return FirstNonEmpty(
+                rules.Get("检查项", "标点词典"),
+                rules.Get("检查项", "符号词典"),
+                rules.Get("检查项", "标点符号"),
+                rules.Get("检查项", "非中文符号")
+            );
+        }
+
+        private static IEnumerable<string> GetLegacySetDocCandidates(RuleBook rules, string fileName)
+        {
+            var list = new List<string>();
+            var rulesPath = rules == null ? string.Empty : rules.loadedPath;
+            if (!string.IsNullOrWhiteSpace(rulesPath))
+            {
+                var rulesDir = Path.GetDirectoryName(rulesPath);
+                if (!string.IsNullOrWhiteSpace(rulesDir))
+                {
+                    list.Add(Path.Combine(rulesDir, "set", fileName));
+                    list.Add(Path.Combine(rulesDir, "..", "set", fileName));
+                }
+            }
+
+            var cwd = Directory.GetCurrentDirectory();
+            list.Add(Path.Combine(cwd, "set", fileName));
+            list.Add(Path.Combine(cwd, "..", "set", fileName));
+
+            var baseDir = AppDomain.CurrentDomain.BaseDirectory;
+            list.Add(Path.Combine(baseDir, "set", fileName));
+            list.Add(Path.Combine(baseDir, "..", "set", fileName));
+            list.Add(Path.Combine(baseDir, "resources", "set", fileName));
+
+            return list
+                .Select(path => Path.GetFullPath(path))
+                .Distinct(StringComparer.OrdinalIgnoreCase);
+        }
+
+        private static string ScanLegacyWordList(
+            string text,
+            List<string> words,
+            string pattern,
+            bool enabled,
+            List<RuleIssue> issues,
+            string rule)
+        {
+            if (!enabled || string.IsNullOrEmpty(text) || words == null || words.Count == 0)
+            {
+                return string.Empty;
+            }
+
+            var sb = new StringBuilder();
+            foreach (var word in words)
+            {
+                if (string.IsNullOrWhiteSpace(word) || !text.Contains(word))
+                {
+                    continue;
+                }
+
+                sb.AppendFormat(pattern, word);
+                issues.Add(new RuleIssue
+                {
+                    category = "检查项",
+                    rule = rule,
+                    message = string.Format(pattern, word),
+                    location = string.Empty,
+                    currentValue = word,
+                    expectedValue = string.Empty,
+                    severity = "warning",
+                    @fixed = false,
+                    snippet = word
+                });
+            }
+
+            return sb.ToString();
+        }
+
+        private static string ScanLegacySensitiveWords(string text, RuleBook rules, List<RuleIssue> issues)
+        {
+            if (string.IsNullOrEmpty(text) || rules == null)
+            {
+                return string.Empty;
+            }
+
+            var words = (rules.Get("检查项", "敏感词") ?? string.Empty).Replace('；', ';');
+            if (string.IsNullOrWhiteSpace(words))
+            {
+                return string.Empty;
+            }
+
+            var sb = new StringBuilder();
+            foreach (var token in words.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries))
+            {
+                var word = token.Trim();
+                if (string.IsNullOrWhiteSpace(word) || !text.Contains(word))
+                {
+                    continue;
+                }
+
+                var message = string.Format("存在敏感词：{0}。", word);
+                sb.Append(message);
+                issues.Add(new RuleIssue
+                {
+                    category = "检查项",
+                    rule = "敏感词",
+                    message = message,
+                    location = string.Empty,
+                    currentValue = word,
+                    expectedValue = string.Empty,
+                    severity = "warning",
+                    @fixed = false,
+                    snippet = word
+                });
+            }
+
+            return sb.ToString();
+        }
+
+        private static string ScanLegacyPunctuation(string text, string punctuationSource, bool enabled, List<RuleIssue> issues)
+        {
+            if (!enabled || string.IsNullOrEmpty(text) || string.IsNullOrWhiteSpace(punctuationSource))
+            {
+                return string.Empty;
+            }
+
+            var hits = new List<char>();
+            var seen = new HashSet<char>();
+            foreach (var ch in text)
+            {
+                if (punctuationSource.IndexOf(ch) >= 0 && seen.Add(ch))
+                {
+                    hits.Add(ch);
+                }
+            }
+
+            if (hits.Count == 0)
+            {
+                return string.Empty;
+            }
+
+            var sb = new StringBuilder();
+            foreach (var ch in hits)
+            {
+                var message = string.Format("存在非中文符号“{0}”。", ch);
+                sb.Append(message);
+                issues.Add(new RuleIssue
+                {
+                    category = "检查项",
+                    rule = "标点检查",
+                    message = message,
+                    location = string.Empty,
+                    currentValue = ch.ToString(),
+                    expectedValue = string.Empty,
+                    severity = "warning",
+                    @fixed = false,
+                    snippet = ch.ToString()
+                });
+            }
+
+            return sb.ToString();
+        }
+
+        private static void ReportProgress(string message)
+        {
+            Console.Error.WriteLine("PROGRESS|" + message);
         }
 
         private static void CheckPage(Document doc, RuleBook rules, List<RuleIssue> issues)
@@ -201,7 +518,9 @@ namespace DocParserSidecarNet48
                         continue;
                     }
 
-                    if (checkSpace && text.Contains(" "))
+                    var headingLevel = DetectHeadingLevel(p, rules);
+                    var textForSpaceCheck = StripAllowedTitleGap(text, headingLevel);
+                    if (checkSpace && textForSpaceCheck.Contains(" "))
                     {
                         issues.Add(new RuleIssue
                         {
@@ -224,7 +543,7 @@ namespace DocParserSidecarNet48
                     if (checkLineBreak
                         && !string.IsNullOrWhiteSpace(prevNonEmptyText)
                         && !LooksLikeSentenceEnd(prevNonEmptyText)
-                        && DetectHeadingLevel(p) <= 0)
+                        && headingLevel <= 0)
                     {
                         issues.Add(new RuleIssue
                         {
@@ -239,7 +558,7 @@ namespace DocParserSidecarNet48
                         });
                     }
 
-                    if (checkBeforeAfter && !IsParagraphSpacingClean(p))
+                    if (headingLevel <= 0 && checkBeforeAfter && !IsParagraphSpacingClean(p))
                     {
                         issues.Add(new RuleIssue
                         {
@@ -254,7 +573,7 @@ namespace DocParserSidecarNet48
                         });
                     }
 
-                    if (expectedFixed > 0 && p.Format.LineSpacingRule == LineSpacingRule.Exactly && Math.Abs(p.Format.LineSpacing - expectedFixed) > 0.1)
+                    if (headingLevel <= 0 && expectedFixed > 0 && p.Format.LineSpacingRule == LineSpacingRule.Exactly && Math.Abs(p.Format.LineSpacing - expectedFixed) > 0.1)
                     {
                         issues.Add(new RuleIssue
                         {
@@ -268,7 +587,7 @@ namespace DocParserSidecarNet48
                             snippet = Clip(text)
                         });
                     }
-                    else if (expectedLineSpacing > 0 && p.Format.LineSpacingRule != LineSpacingRule.Exactly && Math.Abs(p.Format.LineSpacing - expectedLineSpacing) > 0.5)
+                    else if (headingLevel <= 0 && expectedLineSpacing > 0 && p.Format.LineSpacingRule != LineSpacingRule.Exactly && Math.Abs(p.Format.LineSpacing - expectedLineSpacing) > 0.5)
                     {
                         issues.Add(new RuleIssue
                         {
@@ -312,7 +631,7 @@ namespace DocParserSidecarNet48
                         });
                     }
 
-                    if (expectedIndent > 0 && Math.Abs(p.Format.FirstLineIndentChars - expectedIndent) > 0.01)
+                    if (headingLevel <= 0 && expectedIndent > 0 && Math.Abs(p.Format.FirstLineIndentChars - expectedIndent) > 0.01)
                     {
                         issues.Add(new RuleIssue
                         {
@@ -327,7 +646,7 @@ namespace DocParserSidecarNet48
                         });
                     }
 
-                    if (!string.IsNullOrWhiteSpace(expectedAlign))
+                    if (headingLevel <= 0 && !string.IsNullOrWhiteSpace(expectedAlign))
                     {
                         var currentAlign = p.Format.HorizontalAlignment;
                         var expected = MapAlign(expectedAlign);
@@ -347,7 +666,7 @@ namespace DocParserSidecarNet48
                         }
                     }
 
-                    if (!string.IsNullOrWhiteSpace(expectedCharSpacing))
+                    if (headingLevel <= 0 && !string.IsNullOrWhiteSpace(expectedCharSpacing))
                     {
                         var currentCharSpacing = p.BreakCharacterFormat.CharacterSpacing;
                         if (!IsCharSpacingMatch(expectedCharSpacing, currentCharSpacing))
@@ -379,13 +698,9 @@ namespace DocParserSidecarNet48
                             continue;
                         }
 
-                        if (!string.IsNullOrWhiteSpace(expectedNonChineseFont) && ContainsAsciiLetterOrDigit(tr.Text))
+                        if (headingLevel <= 0 && !string.IsNullOrWhiteSpace(expectedNonChineseFont) && ContainsAsciiLetterOrDigit(tr.Text))
                         {
-                            var curAsciiFont = tr.CharacterFormat.FontNameAscii;
-                            if (string.IsNullOrWhiteSpace(curAsciiFont))
-                            {
-                                curAsciiFont = tr.CharacterFormat.FontName;
-                            }
+                            var curAsciiFont = GetEffectiveAsciiFont(tr);
                             if (!string.IsNullOrWhiteSpace(curAsciiFont) && !FontMatches(curAsciiFont, expectedNonChineseFont))
                             {
                                 issues.Add(new RuleIssue
@@ -402,9 +717,9 @@ namespace DocParserSidecarNet48
                             }
                         }
 
-                        if (!string.IsNullOrWhiteSpace(expectedFont))
+                        if (headingLevel <= 0 && !string.IsNullOrWhiteSpace(expectedFont))
                         {
-                            var cur = tr.CharacterFormat.FontNameFarEast;
+                            var cur = GetEffectiveChineseFont(tr);
                             if (!string.IsNullOrWhiteSpace(cur) && !string.Equals(cur, expectedFont, StringComparison.OrdinalIgnoreCase))
                             {
                                 issues.Add(new RuleIssue
@@ -421,9 +736,9 @@ namespace DocParserSidecarNet48
                             }
                         }
 
-                        if (expectedSize > 0)
+                        if (headingLevel <= 0 && expectedSize > 0)
                         {
-                            var curSize = tr.CharacterFormat.FontSize;
+                            var curSize = GetEffectiveFontSize(tr);
                             if (Math.Abs(curSize - expectedSize) > 0.1)
                             {
                                 issues.Add(new RuleIssue
@@ -440,7 +755,7 @@ namespace DocParserSidecarNet48
                             }
                         }
 
-                        if (checkStyle)
+                        if (headingLevel <= 0 && checkStyle)
                         {
                             if (tr.CharacterFormat.Bold)
                             {
@@ -532,7 +847,7 @@ namespace DocParserSidecarNet48
                         continue;
                     }
 
-                    var level = DetectHeadingLevel(p);
+                    var level = DetectHeadingLevel(p, rules);
                     if (level <= 0 || !sectionByLevel.ContainsKey(level))
                     {
                         continue;
@@ -543,7 +858,7 @@ namespace DocParserSidecarNet48
                     var expectedSizeName = rules.Get(titleSection, "字号");
                     var expectedSize = FontSizeNameToPt(expectedSizeName);
                     var expectedBold = rules.GetBool(titleSection, "加粗", false);
-                    var titlePattern = ResolveTitlePattern(rules.Get(titleSection, "标题规则"));
+                    var titlePattern = ResolveTitlePattern(rules, rules.Get(titleSection, "标题规则"));
 
                     if (!string.IsNullOrWhiteSpace(titlePattern))
                     {
@@ -585,7 +900,7 @@ namespace DocParserSidecarNet48
 
                         if (!string.IsNullOrWhiteSpace(expectedFont))
                         {
-                            var cur = tr.CharacterFormat.FontNameFarEast;
+                            var cur = GetEffectiveChineseFont(tr);
                             if (!string.IsNullOrWhiteSpace(cur) && !string.Equals(cur, expectedFont, StringComparison.OrdinalIgnoreCase))
                             {
                                 issues.Add(new RuleIssue
@@ -602,15 +917,16 @@ namespace DocParserSidecarNet48
                             }
                         }
 
-                        if (expectedSize > 0 && Math.Abs(tr.CharacterFormat.FontSize - expectedSize) > 0.1)
+                        var currentTitleSize = GetEffectiveFontSize(tr);
+                        if (expectedSize > 0 && Math.Abs(currentTitleSize - expectedSize) > 0.1)
                         {
                             issues.Add(new RuleIssue
                             {
                                 category = titleSection,
                                 rule = "字号",
-                                message = titleSection + "字号不正确，当前=" + tr.CharacterFormat.FontSize.ToString("0.##") + "，应为=" + expectedSizeName,
+                                message = titleSection + "字号不正确，当前=" + currentTitleSize.ToString("0.##") + "，应为=" + expectedSizeName,
                                 location = "P" + idx,
-                                currentValue = tr.CharacterFormat.FontSize.ToString("0.##"),
+                                currentValue = currentTitleSize.ToString("0.##"),
                                 expectedValue = expectedSizeName,
                                 severity = "warning",
                                 snippet = Clip(text)
@@ -680,17 +996,18 @@ namespace DocParserSidecarNet48
                         {
                             if (smartFix)
                             {
-                                table.Format.HorizontalAlignment = (HorizontalAlignment)expected;
+                                table.Format.HorizontalAlignment = (RowAlignment)expected;
                             }
                             else
                             {
+                            var currentAlignLabel = NormalizeHorizontalAlignLabel(table.Format.HorizontalAlignment.ToString());
                             issues.Add(new RuleIssue
                             {
                                 category = "表格",
                                 rule = "表格水平对齐方式",
-                                message = "表格对齐方式不正确，当前=" + table.Format.HorizontalAlignment + "，应为=" + expectedAlign,
+                                message = "表格对齐方式不正确，当前=" + currentAlignLabel + "，应为=" + expectedAlign,
                                 location = location,
-                                currentValue = table.Format.HorizontalAlignment.ToString(),
+                                currentValue = currentAlignLabel,
                                 expectedValue = expectedAlign,
                                 severity = "warning"
                             });
@@ -801,7 +1118,7 @@ namespace DocParserSidecarNet48
 
                                         if (!string.IsNullOrWhiteSpace(expectedFont))
                                         {
-                                            var cur = tr.CharacterFormat.FontNameFarEast;
+                                            var cur = GetEffectiveChineseFont(tr);
                                             if (!string.IsNullOrWhiteSpace(cur) && !string.Equals(cur, expectedFont, StringComparison.OrdinalIgnoreCase))
                                             {
                                                 issues.Add(new RuleIssue
@@ -820,15 +1137,16 @@ namespace DocParserSidecarNet48
                                             }
                                         }
 
-                                        if (expectedSize > 0 && Math.Abs(tr.CharacterFormat.FontSize - expectedSize) > 0.1)
+                                        var currentTableSize = GetEffectiveFontSize(tr);
+                                        if (expectedSize > 0 && Math.Abs(currentTableSize - expectedSize) > 0.1)
                                         {
                                             issues.Add(new RuleIssue
                                             {
                                                 category = "表格",
                                                 rule = "字号",
-                                                message = "表格字号不正确，当前=" + tr.CharacterFormat.FontSize.ToString("0.##") + "pt，应为=" + expectedSizeName,
+                                                message = "表格字号不正确，当前=" + currentTableSize.ToString("0.##") + "pt，应为=" + expectedSizeName,
                                                 location = location,
-                                                currentValue = tr.CharacterFormat.FontSize.ToString("0.##"),
+                                                currentValue = currentTableSize.ToString("0.##"),
                                                 expectedValue = expectedSizeName,
                                                 severity = "warning",
                                                 snippet = Clip(tr.Text)
@@ -913,15 +1231,16 @@ namespace DocParserSidecarNet48
                                     });
                                 }
 
-                                if (expectedTableAlign > -1 && (int)p.Format.HorizontalAlignment != expectedTableAlign)
+                                var currentTableAlign = NormalizeHorizontalAlignLabel(p.Format.HorizontalAlignment.ToString());
+                                if (expectedTableAlign > -1 && !TableParagraphAlignMatches(expectedTableAlignName, currentTableAlign))
                                 {
                                     issues.Add(new RuleIssue
                                     {
                                         category = "表格",
                                         rule = "对齐方式",
-                                        message = "表格段落对齐方式不正确，当前=" + p.Format.HorizontalAlignment + "，应为=" + expectedTableAlignName,
+                                        message = "表格段落对齐方式不正确，当前=" + currentTableAlign + "，应为=" + expectedTableAlignName,
                                         location = location,
-                                        currentValue = p.Format.HorizontalAlignment.ToString(),
+                                        currentValue = currentTableAlign,
                                         expectedValue = expectedTableAlignName,
                                         severity = "warning",
                                         snippet = Clip(text)
@@ -966,6 +1285,154 @@ namespace DocParserSidecarNet48
                     }
                 }
             }
+        }
+
+        private static void CheckWordTextRules(Document doc, RuleBook rules, List<RuleIssue> issues)
+        {
+            if (doc == null || rules == null || issues == null)
+            {
+                return;
+            }
+
+            var sensitiveWords = SplitTerms(
+                FirstNonEmpty(
+                    rules.Get("检查项", "敏感词词典"),
+                    rules.Get("检查项", "敏感词列表"),
+                    rules.Get("检查项", "敏感词")
+                )
+            );
+            var placeWords = SplitTerms(
+                FirstNonEmpty(
+                    rules.Get("检查项", "地名词典"),
+                    rules.Get("检查项", "地名列表"),
+                    rules.Get("检查项", "地名"),
+                    rules.Get("检查项", "地名库")
+                )
+            );
+            var checkPlace = rules.GetBool("检查项", "地名检查", placeWords.Count > 0);
+            var companyWords = SplitTerms(
+                FirstNonEmpty(
+                    rules.Get("检查项", "公司名词典"),
+                    rules.Get("检查项", "公司名列表"),
+                    rules.Get("检查项", "公司名"),
+                    rules.Get("检查项", "公司列表")
+                )
+            );
+            var checkCompany = rules.GetBool("检查项", "公司名检查", companyWords.Count > 0);
+            var punctuationConfig = FirstNonEmpty(
+                rules.Get("检查项", "标点词典"),
+                rules.Get("检查项", "非中文符号"),
+                rules.Get("检查项", "符号词典"),
+                rules.Get("检查项", "标点符号")
+            );
+            var checkPunctuation = rules.GetBool("检查项", "标点检查", !string.IsNullOrWhiteSpace(punctuationConfig));
+            var punctuationSymbols = BuildPunctuationSet(
+                punctuationConfig
+            );
+
+            var idx = 0;
+            foreach (Section section in doc.Sections)
+            {
+                foreach (Paragraph p in section.Paragraphs)
+                {
+                    idx += 1;
+                    var text = (p == null ? string.Empty : p.Text) ?? string.Empty;
+                    text = text.Trim();
+                    if (text.Length == 0)
+                    {
+                        continue;
+                    }
+
+                    var location = "P" + idx;
+                    var normalizedText = NormalizeSearchText(text);
+                    if (normalizedText.Length == 0)
+                    {
+                        continue;
+                    }
+
+                    AddWordListIssues(issues, normalizedText, text, location, sensitiveWords, "敏感词", "存在敏感词：", "不出现敏感词");
+                    if (checkPlace)
+                    {
+                        AddWordListIssues(issues, normalizedText, text, location, placeWords, "地名检查", "存在地名：", "不出现地名");
+                    }
+                    if (checkCompany)
+                    {
+                        AddWordListIssues(issues, normalizedText, text, location, companyWords, "公司名检查", "存在公司名：", "不出现公司名");
+                    }
+                    if (checkPunctuation)
+                    {
+                        AddPunctuationIssues(issues, text, location, punctuationSymbols);
+                    }
+                }
+            }
+        }
+
+        private static void AddWordListIssues(
+            List<RuleIssue> issues,
+            string normalizedText,
+            string rawText,
+            string location,
+            List<string> words,
+            string rule,
+            string messagePrefix,
+            string expectedValue)
+        {
+            if (issues == null || words == null || words.Count == 0 || string.IsNullOrWhiteSpace(normalizedText))
+            {
+                return;
+            }
+
+            foreach (var word in words)
+            {
+                if (string.IsNullOrWhiteSpace(word))
+                {
+                    continue;
+                }
+
+                if (normalizedText.IndexOf(word, StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    issues.Add(new RuleIssue
+                    {
+                        category = "检查项",
+                        rule = rule,
+                        message = messagePrefix + word + "。",
+                        location = location,
+                        currentValue = word,
+                        expectedValue = expectedValue,
+                        severity = "warning",
+                        @fixed = false,
+                        snippet = Clip(rawText)
+                    });
+                }
+            }
+        }
+
+        private static void AddPunctuationIssues(List<RuleIssue> issues, string rawText, string location, HashSet<char> punctuationSymbols)
+        {
+            if (issues == null || punctuationSymbols == null || punctuationSymbols.Count == 0 || string.IsNullOrWhiteSpace(rawText))
+            {
+                return;
+            }
+
+            var hit = rawText.Where(ch => punctuationSymbols.Contains(ch)).Distinct().ToList();
+            if (hit.Count == 0)
+            {
+                return;
+            }
+
+            var msg = string.Concat(hit.Select(ch => "存在非中文符号“" + ch + "”。"));
+            issues.Add(new RuleIssue
+            {
+                category = "检查项",
+                rule = "标点检查",
+                message = msg,
+                location = location,
+                currentValue = string.Concat(hit),
+                expectedValue = "不出现非中文符号",
+                severity = "warning",
+                @fixed = false,
+                snippet = Clip(rawText)
+            });
         }
 
         private static void CheckPageAdvanced(Document doc, RuleBook rules, List<RuleIssue> issues)
@@ -1089,7 +1556,7 @@ namespace DocParserSidecarNet48
 
                 if (!string.IsNullOrWhiteSpace(expectedCoverFont))
                 {
-                    var cur = tr.CharacterFormat.FontNameFarEast;
+                    var cur = GetEffectiveChineseFont(tr);
                     if (!string.IsNullOrWhiteSpace(cur) && !string.Equals(cur, expectedCoverFont, StringComparison.OrdinalIgnoreCase))
                     {
                         issues.Add(new RuleIssue
@@ -1105,7 +1572,8 @@ namespace DocParserSidecarNet48
                     }
                 }
 
-                if (expectedCoverSize > 0 && Math.Abs(tr.CharacterFormat.FontSize - expectedCoverSize) > 0.1)
+                var currentCoverSize = GetEffectiveFontSize(tr);
+                if (expectedCoverSize > 0 && Math.Abs(currentCoverSize - expectedCoverSize) > 0.1)
                 {
                     issues.Add(new RuleIssue
                     {
@@ -1113,7 +1581,7 @@ namespace DocParserSidecarNet48
                         rule = "封面字号",
                         message = "封面字号不正确。",
                         location = "P1",
-                        currentValue = tr.CharacterFormat.FontSize.ToString("0.##"),
+                        currentValue = currentCoverSize.ToString("0.##"),
                         expectedValue = expectedCoverSizeName,
                         severity = "warning"
                     });
@@ -1133,7 +1601,7 @@ namespace DocParserSidecarNet48
                         rule = "封面水平对齐方式",
                         message = "封面水平对齐方式不正确。",
                         location = "P1",
-                        currentValue = found.Format.HorizontalAlignment.ToString(),
+                        currentValue = NormalizeHorizontalAlignLabel(found.Format.HorizontalAlignment.ToString()),
                         expectedValue = expectedCoverAlign,
                         severity = "warning"
                     });
@@ -1358,6 +1826,36 @@ namespace DocParserSidecarNet48
             return t;
         }
 
+        private static string NormalizeHorizontalAlignLabel(string raw)
+        {
+            var t = (raw ?? string.Empty).Trim();
+            if (t.Length == 0)
+            {
+                return string.Empty;
+            }
+            if (t.Contains("Left") || t.Contains("左"))
+            {
+                return "左对齐";
+            }
+            if (t.Contains("Center") || t.Contains("中"))
+            {
+                return "居中";
+            }
+            if (t.Contains("Right") || t.Contains("右"))
+            {
+                return "右对齐";
+            }
+            if (t.Contains("Justify") || t.Contains("两端"))
+            {
+                return "两端对齐";
+            }
+            if (t.Contains("Distributed") || t.Contains("分散"))
+            {
+                return "分散对齐";
+            }
+            return t;
+        }
+
         private static bool VerticalAlignMatches(string expectedRaw, string currentRaw)
         {
             var expected = NormalizeVerticalAlignLabel(expectedRaw);
@@ -1373,6 +1871,117 @@ namespace DocParserSidecarNet48
         {
             var t = (s ?? string.Empty).Replace("\r", " ").Replace("\n", " ").Trim();
             return t.Length <= 28 ? t : t.Substring(0, 28) + "...";
+        }
+
+        private static string FirstNonEmpty(params string[] values)
+        {
+            foreach (var value in values)
+            {
+                if (!string.IsNullOrWhiteSpace(value))
+                {
+                    return value.Trim();
+                }
+            }
+
+            return string.Empty;
+        }
+
+        private static List<string> SplitTerms(string raw)
+        {
+            if (string.IsNullOrWhiteSpace(raw))
+            {
+                return new List<string>();
+            }
+
+            return raw
+                .Split(new[] { '\r', '\n', ',', '，', ';', '；', '|', '、', '\t', ' ' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(x => x.Trim())
+                .Where(x => x.Length > 0)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+        }
+
+        private static string NormalizeSearchText(string text)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                return string.Empty;
+            }
+
+            return text
+                .Replace("\n", string.Empty)
+                .Replace("\t", string.Empty)
+                .Replace("\r", string.Empty)
+                .Replace("\a", string.Empty)
+                .Trim();
+        }
+
+        private static HashSet<char> BuildPunctuationSet(string configured)
+        {
+            var source = string.IsNullOrWhiteSpace(configured)
+                ? "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~"
+                : configured;
+
+            return new HashSet<char>(source.Where(ch => !char.IsWhiteSpace(ch)));
+        }
+
+        private static string GetEffectiveChineseFont(TextRange tr)
+        {
+            if (tr == null || tr.CharacterFormat == null)
+            {
+                return string.Empty;
+            }
+
+            return FirstNonEmpty(
+                tr.CharacterFormat.FontNameFarEast,
+                tr.CharacterFormat.FontName
+            );
+        }
+
+        private static string GetEffectiveAsciiFont(TextRange tr)
+        {
+            if (tr == null || tr.CharacterFormat == null)
+            {
+                return string.Empty;
+            }
+
+            return FirstNonEmpty(
+                tr.CharacterFormat.FontNameNonFarEast,
+                tr.CharacterFormat.FontNameAscii,
+                tr.CharacterFormat.FontName
+            );
+        }
+
+        private static float GetEffectiveFontSize(TextRange tr)
+        {
+            if (tr == null || tr.CharacterFormat == null)
+            {
+                return 0f;
+            }
+
+            try
+            {
+                if (tr.CharacterFormat.Font != null && tr.CharacterFormat.Font.Size > 0.01f)
+                {
+                    return tr.CharacterFormat.Font.Size;
+                }
+            }
+            catch
+            {
+            }
+
+            return tr.CharacterFormat.FontSize > 0.01f ? tr.CharacterFormat.FontSize : 0f;
+        }
+
+        private static string NormalizeLegacyLocation(string location)
+        {
+            if (string.IsNullOrWhiteSpace(location))
+            {
+                return string.Empty;
+            }
+
+            var match = Regex.Match(location, @"P\d+");
+            return match.Success ? match.Value : string.Empty;
         }
 
         private static int MapAlign(string align)
@@ -1426,6 +2035,111 @@ namespace DocParserSidecarNet48
             return 0;
         }
 
+        private static int DetectHeadingLevel(Paragraph p, RuleBook rules)
+        {
+            var level = DetectHeadingLevel(p);
+            if (level > 0)
+            {
+                return level;
+            }
+
+            var text = (p == null ? string.Empty : p.Text) ?? string.Empty;
+            text = text.Trim();
+            if (text.Length == 0)
+            {
+                return 0;
+            }
+
+            var sectionByLevel = new Dictionary<int, string>
+            {
+                { 1, "一级标题" },
+                { 2, "二级标题" },
+                { 3, "三级标题" },
+                { 4, "四级标题" },
+                { 5, "五级标题" },
+                { 6, "六级标题" },
+                { 7, "七级标题" }
+            };
+
+            foreach (var kv in sectionByLevel)
+            {
+                var raw = rules.Get(kv.Value, "标题规则");
+                var pattern = ResolveTitlePattern(rules, raw);
+                if (!string.IsNullOrWhiteSpace(pattern))
+                {
+                    try
+                    {
+                        if (Regex.IsMatch(text, pattern))
+                        {
+                            return kv.Key;
+                        }
+                    }
+                    catch
+                    {
+                    }
+                }
+            }
+
+            if (Regex.IsMatch(text, @"^[一二三四五六七八九十百千]+、")) return 1;
+            if (Regex.IsMatch(text, @"^（[一二三四五六七八九十百千]+）")) return 2;
+            if (Regex.IsMatch(text, @"^[0-9]{1,3}\.[^0-9]")) return 1;
+            if (Regex.IsMatch(text, @"^[0-9]{1,3}\.[0-9]{1,3}([^0-9\.]|$)")) return 2;
+            if (Regex.IsMatch(text, @"^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}([^0-9\.]|$)")) return 3;
+
+            return 0;
+        }
+
+        private static bool TableParagraphAlignMatches(string expectedRaw, string currentRaw)
+        {
+            var expected = NormalizeHorizontalAlignLabel(expectedRaw);
+            var current = NormalizeHorizontalAlignLabel(currentRaw);
+            if (string.Equals(expected, current, StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
+            return expected == "左对齐" && (current == "两端对齐" || current == "分散对齐");
+        }
+
+        private static string StripAllowedTitleGap(string text, int headingLevel)
+        {
+            var value = (text ?? string.Empty).Trim();
+            if (headingLevel <= 0 || value.Length <= 1)
+            {
+                return value;
+            }
+
+            var titlePrefixPatterns = new[]
+            {
+                @"^[一二三四五六七八九十百千]+、",
+                @"^（[一二三四五六七八九十百千]+）",
+                @"^\([一二三四五六七八九十百千]+\)",
+                @"^[0-9]{1,3}\.",
+                @"^[0-9]{1,3}、",
+                @"^[0-9]{1,3}\.[0-9]{1,3}",
+                @"^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}",
+                @"^（[0-9]{1,3}）",
+                @"^\([0-9]{1,3}\)",
+                @"^[0-9]{1,3}）"
+            };
+
+            foreach (var pattern in titlePrefixPatterns)
+            {
+                var match = Regex.Match(value, pattern);
+                if (match.Success)
+                {
+                    var rest = value.Substring(match.Length);
+                    if (rest.StartsWith(" "))
+                    {
+                        return rest.Substring(1);
+                    }
+                    return rest;
+                }
+            }
+
+            return value;
+        }
+
         private static bool HasTitleNumberNoSpace(string text)
         {
             if (string.IsNullOrWhiteSpace(text))
@@ -1469,7 +2183,7 @@ namespace DocParserSidecarNet48
             return 0f;
         }
 
-        private static string ResolveTitlePattern(string raw)
+        private static string ResolveTitlePattern(RuleBook rules, string raw)
         {
             if (string.IsNullOrWhiteSpace(raw))
             {
@@ -1480,6 +2194,12 @@ namespace DocParserSidecarNet48
             if (v.Contains("^") || v.Contains("(") || v.Contains("[") || v.Contains("\\d"))
             {
                 return v;
+            }
+
+            var preset = rules.ResolveTitlePatternLabel(v);
+            if (!string.IsNullOrWhiteSpace(preset))
+            {
+                return preset;
             }
 
             var presets = new Dictionary<string, string>
@@ -1589,42 +2309,519 @@ namespace DocParserSidecarNet48
         private static string BuildReportText(ParseDocumentResponse response)
         {
             var sb = new StringBuilder();
-            sb.AppendLine("检查报告");
+            sb.AppendLine("AiCheckBid 检查报告");
             sb.AppendLine("文件: " + response.filePath);
+            sb.AppendLine("类型: " + response.fileType);
             sb.AppendLine("解析器: " + response.parser);
-            sb.AppendLine("问题总数: " + response.issues.Count);
-            sb.AppendLine("生成时间: " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+            sb.AppendLine("页数: " + (response.pageCount.HasValue ? response.pageCount.Value.ToString() : "-"));
+            sb.AppendLine("问题数: " + response.issues.Count);
+            sb.AppendLine(new string('-', 36));
 
-            if (response.issues.Count == 0)
+            var sections = GetLegacySections();
+            foreach (var section in sections)
             {
-                sb.AppendLine("未发现问题。");
-                return sb.ToString();
+                sb.AppendLine(section + ":");
+                var sectionText = GetLegacySectionText(response, section);
+                if (string.IsNullOrWhiteSpace(sectionText))
+                {
+                    sb.AppendLine("未发现问题。");
+                    sb.AppendLine();
+                    continue;
+                }
+
+                sb.AppendLine(sectionText);
+                sb.AppendLine();
             }
 
-            var groups = response.issues.GroupBy(x => x.category).OrderBy(x => x.Key);
-            foreach (var g in groups)
+            if (response.warnings != null && response.warnings.Count > 0)
             {
-                sb.AppendLine();
-                sb.AppendLine("[" + g.Key + "] 共 " + g.Count() + " 项");
-                foreach (var it in g)
+                sb.AppendLine(new string('-', 36));
+                sb.AppendLine("告警:");
+                foreach (var warning in response.warnings)
                 {
-                    sb.AppendLine(string.Format("- {0} | {1} | {2}", it.location, it.rule, it.message));
+                    sb.AppendLine("- " + warning);
                 }
             }
 
             return sb.ToString();
         }
 
+        private static string[] GetLegacySections()
+        {
+            return new[]
+            {
+                "格式检查结果",
+                "公司名检查结果",
+                "地名检查结果",
+                "人名检查结果",
+                "敏感词检查结果",
+                "标点符号检查结果",
+                "其他检查结果"
+            };
+        }
+
+        private static Dictionary<string, List<RuleIssue>> GroupIssuesByLegacySection(List<RuleIssue> issues)
+        {
+            return issues
+                .GroupBy(MapIssueToLegacySection)
+                .ToDictionary(g => g.Key, g => g.ToList(), StringComparer.OrdinalIgnoreCase);
+        }
+
+        private static string GetLegacySectionText(ParseDocumentResponse response, string section)
+        {
+            if (response != null && response.legacySections != null)
+            {
+                if (string.Equals(section, "格式检查结果", StringComparison.OrdinalIgnoreCase)) return response.legacySections.format;
+                if (string.Equals(section, "公司名检查结果", StringComparison.OrdinalIgnoreCase)) return response.legacySections.company;
+                if (string.Equals(section, "地名检查结果", StringComparison.OrdinalIgnoreCase)) return response.legacySections.place;
+                if (string.Equals(section, "人名检查结果", StringComparison.OrdinalIgnoreCase)) return response.legacySections.person;
+                if (string.Equals(section, "敏感词检查结果", StringComparison.OrdinalIgnoreCase)) return response.legacySections.sensitive;
+                if (string.Equals(section, "标点符号检查结果", StringComparison.OrdinalIgnoreCase)) return response.legacySections.punctuation;
+                if (string.Equals(section, "其他检查结果", StringComparison.OrdinalIgnoreCase)) return response.legacySections.other;
+            }
+
+            var grouped = GroupIssuesByLegacySection(response.issues ?? new List<RuleIssue>());
+            List<RuleIssue> list;
+            if (!grouped.TryGetValue(section, out list) || list.Count == 0)
+            {
+                return string.Empty;
+            }
+
+            var body = new StringBuilder();
+            foreach (var issue in list)
+            {
+                var content = !string.IsNullOrWhiteSpace(issue.snippet) ? issue.snippet : issue.currentValue;
+                var location = response.outputPageNumber ? NormalizeLegacyLocation(issue.location) : string.Empty;
+                var message = ApplyCommentMarker(issue.message, response.commentMarker);
+                body.AppendLine(FormatLegacyReportRow(location, message, content));
+            }
+            return body.ToString().TrimEnd();
+        }
+
+        private static string MapIssueToLegacySection(RuleIssue issue)
+        {
+            if (issue.rule == "公司名检查") return "公司名检查结果";
+            if (issue.rule == "地名检查") return "地名检查结果";
+            if (issue.rule == "敏感词") return "敏感词检查结果";
+            if (issue.rule == "标点检查") return "标点符号检查结果";
+            if (issue.rule == "人名检查") return "人名检查结果";
+            if (issue.category == "页面" || issue.category == "正文" || issue.category == "标题" || issue.category == "表格")
+            {
+                return "格式检查结果";
+            }
+            return "其他检查结果";
+        }
+
+        private static string ApplyCommentMarker(string message, string marker)
+        {
+            marker = marker ?? string.Empty;
+            // 原版“批注标记”用于批注/标注行为，不改写报告文本内容。
+            return message ?? string.Empty;
+        }
+
+        private static string FormatLegacyReportRow(string location, string message, string content)
+        {
+            if (string.IsNullOrWhiteSpace(location))
+            {
+                return string.Format("{0}\t未处理\t{1}\t", message, content);
+            }
+
+            return string.Format("{0}\t{1}\t未处理\t{2}\t", location, message, content);
+        }
+
+        private static void WriteLegacySourceCopy(ParseDocumentResponse response, string resultDir)
+        {
+            var sourcePath = response == null ? string.Empty : response.filePath;
+            if (string.IsNullOrWhiteSpace(sourcePath) || !File.Exists(sourcePath))
+            {
+                return;
+            }
+
+            var sourceName = Path.GetFileNameWithoutExtension(sourcePath);
+            if (string.IsNullOrWhiteSpace(sourceName))
+            {
+                sourceName = "document";
+            }
+            var targetPath = Path.Combine(resultDir, sourceName + "m" + Path.GetExtension(sourcePath));
+            if (!string.Equals(Path.GetFullPath(sourcePath), Path.GetFullPath(targetPath), StringComparison.OrdinalIgnoreCase))
+            {
+                if (response != null && response.smartFixSaved && File.Exists(targetPath))
+                {
+                    if (!CanWriteLegacyComments(response))
+                    {
+                        return;
+                    }
+
+                    try
+                    {
+                        using (var doc = new Document())
+                        {
+                            doc.LoadFromFile(targetPath);
+                            ApplyLegacyComments(doc, response.issues, response.commentMarker);
+                            doc.SaveToFile(targetPath, ResolveWordFileFormat(sourcePath));
+                        }
+                        return;
+                    }
+                    catch
+                    {
+                    }
+                }
+
+                if (CanWriteLegacyComments(response))
+                {
+                    try
+                    {
+                        using (var doc = new Document())
+                        {
+                            doc.LoadFromFile(sourcePath);
+                            ApplyLegacyComments(doc, response.issues, response.commentMarker);
+                            doc.SaveToFile(targetPath, ResolveWordFileFormat(sourcePath));
+                        }
+                        return;
+                    }
+                    catch
+                    {
+                    }
+                }
+
+                File.Copy(sourcePath, targetPath, true);
+            }
+        }
+
+        private static void SaveSmartFixedCopy(Document doc, string sourcePath, ParseDocumentResponse response)
+        {
+            if (doc == null || response == null || !response.smartFixEnabled)
+            {
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(sourcePath) || !File.Exists(sourcePath))
+            {
+                return;
+            }
+
+            try
+            {
+                var resultDir = ResolveResultDir(sourcePath);
+                Directory.CreateDirectory(resultDir);
+                var sourceName = Path.GetFileNameWithoutExtension(sourcePath);
+                if (string.IsNullOrWhiteSpace(sourceName))
+                {
+                    sourceName = "document";
+                }
+
+                var targetPath = Path.Combine(resultDir, sourceName + "m" + Path.GetExtension(sourcePath));
+                if (string.Equals(Path.GetFullPath(sourcePath), Path.GetFullPath(targetPath), StringComparison.OrdinalIgnoreCase))
+                {
+                    return;
+                }
+
+                doc.SaveToFile(targetPath, ResolveWordFileFormat(sourcePath));
+                response.smartFixSaved = true;
+            }
+            catch (Exception ex)
+            {
+                response.warnings.Add("智能修正结果保存失败: " + ex.Message);
+            }
+        }
+
+        private static bool CanWriteLegacyComments(ParseDocumentResponse response)
+        {
+            if (response == null || response.issues == null || response.issues.Count == 0)
+            {
+                return false;
+            }
+
+            return IsCommentMarkerEnabled(response.commentMarker)
+                && (string.Equals(response.fileType, "doc", StringComparison.OrdinalIgnoreCase)
+                    || string.Equals(response.fileType, "docx", StringComparison.OrdinalIgnoreCase));
+        }
+
+        private static bool IsCommentMarkerEnabled(string marker)
+        {
+            return string.Equals(marker, "全标记", StringComparison.Ordinal)
+                || string.Equals(marker, "可疑问题不批注", StringComparison.Ordinal);
+        }
+
+        private static void ApplyLegacyComments(Document doc, List<RuleIssue> issues, string marker)
+        {
+            if (doc == null || issues == null || issues.Count == 0 || !IsCommentMarkerEnabled(marker))
+            {
+                return;
+            }
+
+            var paragraphMap = BuildLegacyParagraphMap(doc);
+            var tableAnchorMap = BuildLegacyTableAnchorMap(doc);
+            var commentMap = BuildLegacyCommentMap(issues, marker);
+            foreach (var pair in commentMap)
+            {
+                Paragraph paragraph;
+                if (pair.Key.StartsWith("P", StringComparison.Ordinal))
+                {
+                    int index;
+                    if (!TryParseLegacyLocationIndex(pair.Key, 'P', out index) || !paragraphMap.TryGetValue(index, out paragraph))
+                    {
+                        continue;
+                    }
+                }
+                else if (pair.Key.StartsWith("T", StringComparison.Ordinal))
+                {
+                    int index;
+                    if (!TryParseLegacyLocationIndex(pair.Key, 'T', out index) || !tableAnchorMap.TryGetValue(index, out paragraph))
+                    {
+                        continue;
+                    }
+                }
+                else
+                {
+                    continue;
+                }
+
+                AppendLegacyComment(paragraph, pair.Value);
+            }
+        }
+
+        private static Dictionary<int, Paragraph> BuildLegacyParagraphMap(Document doc)
+        {
+            var map = new Dictionary<int, Paragraph>();
+            var index = 0;
+            foreach (Section section in doc.Sections)
+            {
+                foreach (Paragraph paragraph in section.Paragraphs)
+                {
+                    index++;
+                    map[index] = paragraph;
+                }
+            }
+            return map;
+        }
+
+        private static Dictionary<int, Paragraph> BuildLegacyTableAnchorMap(Document doc)
+        {
+            var map = new Dictionary<int, Paragraph>();
+            var index = 0;
+            foreach (Section section in doc.Sections)
+            {
+                foreach (Table table in section.Tables)
+                {
+                    index++;
+                    var anchor = FindTableAnchorParagraph(table);
+                    if (anchor != null)
+                    {
+                        map[index] = anchor;
+                    }
+                }
+            }
+            return map;
+        }
+
+        private static Paragraph FindTableAnchorParagraph(Table table)
+        {
+            if (table == null)
+            {
+                return null;
+            }
+
+            foreach (TableRow row in table.Rows)
+            {
+                foreach (TableCell cell in row.Cells)
+                {
+                    foreach (Paragraph paragraph in cell.Paragraphs)
+                    {
+                        if (paragraph != null)
+                        {
+                            return paragraph;
+                        }
+                    }
+                }
+            }
+
+            if (table.Rows.Count == 0 || table.Rows[0].Cells.Count == 0)
+            {
+                return null;
+            }
+
+            return table.Rows[0].Cells[0].AddParagraph();
+        }
+
+        private static Dictionary<string, string> BuildLegacyCommentMap(List<RuleIssue> issues, string marker)
+        {
+            var map = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
+            foreach (var issue in issues)
+            {
+                if (!ShouldWriteIssueComment(issue, marker))
+                {
+                    continue;
+                }
+
+                var location = (issue.location ?? string.Empty).Trim();
+                if (location.Length == 0)
+                {
+                    continue;
+                }
+
+                List<string> messages;
+                if (!map.TryGetValue(location, out messages))
+                {
+                    messages = new List<string>();
+                    map[location] = messages;
+                }
+
+                var message = BuildLegacyCommentMessage(issue);
+                if (!string.IsNullOrWhiteSpace(message) && !messages.Contains(message))
+                {
+                    messages.Add(message);
+                }
+            }
+
+            return map.ToDictionary(
+                pair => pair.Key,
+                pair => string.Join(Environment.NewLine, pair.Value.Where(x => !string.IsNullOrWhiteSpace(x))),
+                StringComparer.OrdinalIgnoreCase);
+        }
+
+        private static bool ShouldWriteIssueComment(RuleIssue issue, string marker)
+        {
+            if (issue == null || !IsCommentMarkerEnabled(marker))
+            {
+                return false;
+            }
+
+            var location = (issue.location ?? string.Empty).Trim();
+            if (!(location.StartsWith("P", StringComparison.OrdinalIgnoreCase) || location.StartsWith("T", StringComparison.OrdinalIgnoreCase)))
+            {
+                return false;
+            }
+
+            if (!string.Equals(marker, "可疑问题不批注", StringComparison.Ordinal))
+            {
+                return true;
+            }
+
+            var rule = (issue.rule ?? string.Empty).Trim();
+            return !string.Equals(rule, "标点检查", StringComparison.Ordinal)
+                && !string.Equals(rule, "公司名检查", StringComparison.Ordinal)
+                && !string.Equals(rule, "人名检查", StringComparison.Ordinal)
+                && !string.Equals(rule, "断行检查", StringComparison.Ordinal);
+        }
+
+        private static string BuildLegacyCommentMessage(RuleIssue issue)
+        {
+            if (issue == null)
+            {
+                return string.Empty;
+            }
+
+            var text = (issue.message ?? string.Empty).Trim();
+            var snippet = (issue.snippet ?? string.Empty).Trim();
+            if (!string.IsNullOrWhiteSpace(snippet))
+            {
+                return text + " " + snippet;
+            }
+            return text;
+        }
+
+        private static bool TryParseLegacyLocationIndex(string location, char prefix, out int index)
+        {
+            index = 0;
+            if (string.IsNullOrWhiteSpace(location) || char.ToUpperInvariant(location[0]) != char.ToUpperInvariant(prefix))
+            {
+                return false;
+            }
+
+            return int.TryParse(location.Substring(1), out index) && index > 0;
+        }
+
+        private static void AppendLegacyComment(Paragraph paragraph, string text)
+        {
+            if (paragraph == null || string.IsNullOrWhiteSpace(text))
+            {
+                return;
+            }
+
+            try
+            {
+                var comment = paragraph.AppendComment(text);
+                if (comment != null && comment.Format != null)
+                {
+                    comment.Format.Author = "智脑科技";
+                }
+            }
+            catch
+            {
+            }
+        }
+
+        private static FileFormat ResolveWordFileFormat(string sourcePath)
+        {
+            return string.Equals(Path.GetExtension(sourcePath), ".doc", StringComparison.OrdinalIgnoreCase)
+                ? FileFormat.Doc
+                : FileFormat.Docx;
+        }
+
+        private static void WriteLegacySectionFiles(ParseDocumentResponse response, string resultDir, int batchSerial)
+        {
+            foreach (var section in GetLegacySections())
+            {
+                var content = GetLegacySectionText(response, section);
+                File.WriteAllText(
+                    Path.Combine(resultDir, batchSerial + "的" + section + ".txt"),
+                    string.IsNullOrWhiteSpace(content) ? "未发现问题。" : content,
+                    new UTF8Encoding(false));
+            }
+        }
+
+        private static void WriteLegacyOverviewFile(string resultDir, string sourceName, int batchSerial, string overviewMode)
+        {
+            if (!Directory.Exists(resultDir))
+            {
+                return;
+            }
+
+            var sb = new StringBuilder();
+            sb.Append(batchSerial);
+            sb.Append('\t');
+            sb.Append(sourceName);
+            sb.Append("m\t");
+            sb.Append(batchSerial);
+            sb.Append("的格式检查结果\t");
+            sb.Append(batchSerial);
+            sb.Append("的公司名检查结果\t");
+            sb.Append(batchSerial);
+            sb.Append("的地名检查结果\t");
+            sb.Append(batchSerial);
+            sb.Append("的人名检查结果\t");
+            sb.Append(batchSerial);
+            sb.Append("的敏感词检查结果\t");
+            sb.Append(batchSerial);
+            sb.Append("的标点符号检查结果\t");
+            sb.Append(batchSerial);
+            sb.AppendLine("的其他检查结果");
+
+            var overviewPath = Path.Combine(resultDir, "检查结果概要.txt");
+            if (string.Equals(overviewMode, "append", StringComparison.OrdinalIgnoreCase) && File.Exists(overviewPath))
+            {
+                File.AppendAllText(overviewPath, sb.ToString(), new UTF8Encoding(false));
+            }
+            else
+            {
+                File.WriteAllText(overviewPath, sb.ToString(), new UTF8Encoding(false));
+            }
+        }
+
         private static string WriteReportFile(ParseDocumentResponse response)
         {
             try
             {
-                var dir = Path.GetDirectoryName(response.filePath) ?? AppDomain.CurrentDomain.BaseDirectory;
-                var resultDir = Path.Combine(dir, "result");
+                var resultDir = ResolveResultDir(response.filePath);
                 Directory.CreateDirectory(resultDir);
                 var name = Path.GetFileNameWithoutExtension(response.filePath);
-                var reportPath = Path.Combine(resultDir, name + "_检查报告.txt");
-                File.WriteAllText(reportPath, response.reportText ?? string.Empty, Encoding.UTF8);
+                WriteLegacySourceCopy(response, resultDir);
+                var batchSerial = ReadBatchSerial();
+                WriteLegacySectionFiles(response, resultDir, batchSerial);
+                WriteLegacyOverviewFile(resultDir, name, batchSerial, ReadOverviewMode());
+                var reportPath = Path.Combine(resultDir, "检查结果-" + name + "m.txt");
+                File.WriteAllText(reportPath, response.reportText ?? string.Empty, new UTF8Encoding(false));
                 return reportPath;
             }
             catch
@@ -1637,19 +2834,19 @@ namespace DocParserSidecarNet48
         {
             try
             {
-                var dir = Path.GetDirectoryName(response.filePath) ?? AppDomain.CurrentDomain.BaseDirectory;
-                var resultDir = Path.Combine(dir, "result");
+                var resultDir = ResolveResultDir(response.filePath);
                 Directory.CreateDirectory(resultDir);
                 var name = Path.GetFileNameWithoutExtension(response.filePath);
-                var path = Path.Combine(resultDir, name + "_检查报告.docx");
+                var path = Path.Combine(resultDir, "检查结果-" + name + "m.docx");
 
                 var doc = new Document();
-                var section = doc.AddSection();
-                var lines = (response.reportText ?? string.Empty).Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
-                foreach (var line in lines)
+                foreach (var sectionName in GetLegacySections())
                 {
-                    section.AddParagraph().AppendText(line);
+                    var section = doc.AddSection();
+                    section.AddParagraph().AppendText(sectionName);
+                    section.AddParagraph().AppendText(string.IsNullOrWhiteSpace(GetLegacySectionText(response, sectionName)) ? "未发现问题。" : GetLegacySectionText(response, sectionName));
                 }
+
                 doc.SaveToFile(path, FileFormat.Docx);
                 doc.Close();
                 return path;
@@ -1658,6 +2855,31 @@ namespace DocParserSidecarNet48
             {
                 return string.Empty;
             }
+        }
+
+        private static string ResolveResultDir(string sourcePath)
+        {
+            var configured = Environment.GetEnvironmentVariable("AICHECKBID_RESULT_DIR");
+            if (!string.IsNullOrWhiteSpace(configured))
+            {
+                return configured.Trim();
+            }
+
+            var dir = Path.GetDirectoryName(sourcePath) ?? AppDomain.CurrentDomain.BaseDirectory;
+            return Path.Combine(dir, "result");
+        }
+
+        private static int ReadBatchSerial()
+        {
+            var raw = Environment.GetEnvironmentVariable("AICHECKBID_BATCH_SERIAL");
+            int value;
+            return int.TryParse(raw, out value) && value > 0 ? value : 1;
+        }
+
+        private static string ReadOverviewMode()
+        {
+            var raw = Environment.GetEnvironmentVariable("AICHECKBID_OVERVIEW_MODE");
+            return string.IsNullOrWhiteSpace(raw) ? "replace" : raw.Trim();
         }
     }
 
@@ -1675,6 +2897,9 @@ namespace DocParserSidecarNet48
         public string reportDocxPath { get; set; }
         public bool outputPageNumber { get; set; }
         public string commentMarker { get; set; }
+        public bool smartFixEnabled { get; set; }
+        public bool smartFixSaved { get; set; }
+        public LegacyWordSections legacySections { get; set; }
     }
 
     internal class DocumentMetrics
@@ -1708,9 +2933,22 @@ namespace DocParserSidecarNet48
         public string snippet { get; set; }
     }
 
+    internal class LegacyWordSections
+    {
+        public string format { get; set; }
+        public string company { get; set; }
+        public string place { get; set; }
+        public string person { get; set; }
+        public string sensitive { get; set; }
+        public string punctuation { get; set; }
+        public string other { get; set; }
+    }
+
     internal class RuleBook
     {
         private readonly Dictionary<string, Dictionary<string, string>> _data = new Dictionary<string, Dictionary<string, string>>(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, string> _titleRuleMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        public string loadedPath { get; private set; }
 
         public static RuleBook Load(string preferredPath, List<string> warnings)
         {
@@ -1725,7 +2963,10 @@ namespace DocParserSidecarNet48
                 if (!File.Exists(path)) continue;
                 try
                 {
-                    return Parse(path);
+                    var rb = Parse(path);
+                    rb.loadedPath = path;
+                    rb.LoadTitleRulePresets(path);
+                    return rb;
                 }
                 catch (Exception ex)
                 {
@@ -1734,7 +2975,9 @@ namespace DocParserSidecarNet48
             }
 
             warnings.Add("未找到 set.ini，当前按空规则执行。");
-            return new RuleBook();
+            var empty = new RuleBook();
+            empty.LoadTitleRulePresets(preferredPath);
+            return empty;
         }
 
         public string Get(string section, string key)
@@ -1764,6 +3007,12 @@ namespace DocParserSidecarNet48
             var v = Get(section, key);
             float f;
             return float.TryParse(v, out f) ? f : 0f;
+        }
+
+        public string ResolveTitlePatternLabel(string label)
+        {
+            string pattern;
+            return _titleRuleMap.TryGetValue(label ?? string.Empty, out pattern) ? pattern : string.Empty;
         }
 
         private static RuleBook Parse(string path)
@@ -1802,6 +3051,70 @@ namespace DocParserSidecarNet48
             }
 
             return rb;
+        }
+
+        private void LoadTitleRulePresets(string rulesPath)
+        {
+            foreach (var path in GetTitlePresetCandidates(rulesPath))
+            {
+                if (!File.Exists(path)) continue;
+                foreach (var raw in ReadTextSmart(path).Split('\n'))
+                {
+                    var line = raw.Trim().TrimEnd('\r');
+                    if (line == string.Empty || line.StartsWith(";") || line.StartsWith("#")) continue;
+
+                    var parts = line.Split(new[] { "*****" }, StringSplitOptions.None);
+                    if (parts.Length >= 2)
+                    {
+                        var label = parts[0].Trim();
+                        var pattern = parts[1].Trim();
+                        if (label != string.Empty && pattern != string.Empty)
+                        {
+                            _titleRuleMap[label] = pattern;
+                        }
+                    }
+                }
+                if (_titleRuleMap.Count > 0)
+                {
+                    return;
+                }
+            }
+        }
+
+        private static IEnumerable<string> GetTitlePresetCandidates(string rulesPath)
+        {
+            var list = new List<string>();
+            if (!string.IsNullOrWhiteSpace(rulesPath))
+            {
+                var dir = Path.GetDirectoryName(rulesPath);
+                if (!string.IsNullOrWhiteSpace(dir))
+                {
+                    list.Add(Path.Combine(dir, "title-presets.txt"));
+                }
+            }
+
+            var cwd = Directory.GetCurrentDirectory();
+            list.Add(Path.Combine(cwd, "rules", "title-presets.txt"));
+            list.Add(Path.Combine(cwd, "title-presets.txt"));
+            list.Add(Path.Combine(cwd, "..", "rules", "title-presets.txt"));
+
+            var baseDir = AppDomain.CurrentDomain.BaseDirectory;
+            list.Add(Path.Combine(baseDir, "rules", "title-presets.txt"));
+            list.Add(Path.Combine(baseDir, "resources", "rules", "title-presets.txt"));
+
+            return list.Distinct(StringComparer.OrdinalIgnoreCase);
+        }
+
+        private static string ReadTextSmart(string path)
+        {
+            var bytes = File.ReadAllBytes(path);
+            if (bytes.Length >= 3 && bytes[0] == 0xEF && bytes[1] == 0xBB && bytes[2] == 0xBF)
+            {
+                return Encoding.UTF8.GetString(bytes, 3, bytes.Length - 3);
+            }
+
+            var utf8 = Encoding.UTF8.GetString(bytes);
+            return utf8.Contains("�") ? Encoding.GetEncoding("GB18030").GetString(bytes) : utf8;
         }
     }
 }

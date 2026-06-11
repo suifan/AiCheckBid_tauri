@@ -5,6 +5,9 @@ use serde::{Deserialize, Serialize};
 pub struct ParseDocumentRequest {
     pub file_path: String,
     pub rules_path: Option<String>,
+    pub batch_serial: Option<i32>,
+    pub batch_total: Option<i32>,
+    pub overview_mode: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

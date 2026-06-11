@@ -30,9 +30,12 @@
 
 ## 运行
 
-1. 安装 Node.js / Rust / .NET 8 SDK
-2. 建议安装 `.NET Framework 4.8 Developer Pack`（用于构建 net48 sidecar）
-2. 在项目根目录执行：
+1. 安装 Node.js
+2. 安装 Rust，并确保使用 `rustup` 管理 MSVC toolchain
+3. 安装 `.NET 8 SDK`
+4. 安装 Visual Studio Build Tools 或 `.NET Framework 4.8 Developer Pack`
+5. 确保 `sidecar/lib/` 下存在 `spire.doc.dll` 与 `spire.license.dll`
+6. 在项目根目录执行：
 
 ```bash
 npm install
@@ -58,12 +61,46 @@ npm run tauri dev
 ```powershell
 & "C:\Windows\Microsoft.NET\Framework64\v4.0.30319\MSBuild.exe" `
   .\sidecar\DocParserSidecarNet48\DocParserSidecarNet48.csproj `
-  /t:Build /p:Configuration=Debug /v:minimal
+  /t:Build /p:Configuration=Debug /p:Platform=AnyCPU /v:minimal
 ```
 
 构建后可执行文件：
 
 `sidecar/DocParserSidecarNet48/bin/Debug/DocParserSidecarNet48.exe`
+
+### 交付构建
+
+`scripts/build-delivery.ps1` 会在打包前显式构建并校验：
+
+- `sidecar/DocParserSidecar/bin/Debug/net8.0/DocParserSidecar.exe`
+- `sidecar/DocParserSidecarNet48/bin/Debug/DocParserSidecarNet48.exe`
+
+默认执行：
+
+```powershell
+& .\scripts\build-delivery.ps1
+```
+
+- 默认产出便携版：`delivery/AiCheckBidNext.exe`
+- 默认同步规则、sidecar 与结果目录到 `delivery/`
+- 默认额外生成便携包压缩文件：`AiCheckBidNext_delivery_latest.zip`
+
+生成安装包：
+
+```powershell
+& .\scripts\build-delivery.ps1 -Installer
+```
+
+- 安装包输出目标：`delivery/AiCheckBidNext_0.1.0_x64-setup.exe`
+
+已知构建机问题：
+
+- 如果日志中出现 `failed to run custom build command for proc-macro2` 且伴随 `Os { code: 0, message: "操作成功完成。" }`，这是 Windows 构建宿主环境问题，不是业务代码编译错误。
+- 可先执行：
+
+```powershell
+& .\scripts\repair-build-env.ps1 -ProjectRoot 'd:\work\ollama\AiCheckBid_tauri'
+```
 
 ## 说明
 

@@ -23,3 +23,10 @@ sidecar/**/obj/
 .vs/
 
 scripts/rustc-wrapper.cmd
+
+.dbg/
+debug*.md
+debug.log
+tmp_*
+tmp-*
+result_*/

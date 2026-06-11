@@ -1,6 +1,9 @@
 export interface ParseDocumentRequest {
   filePath: string;
   rulesPath?: string;
+  batchSerial?: number;
+  batchTotal?: number;
+  overviewMode?: "replace" | "append";
 }
 
 export interface PageMarginsCm {
@@ -69,23 +72,59 @@ export interface PlanInfo {
   priceYuan: number;
 }
 
+export interface DevActivationResult {
+  regCode: string;
+  status: LicenseStatus;
+}
+
+export interface AppDebugFlags {
+  devBuild: boolean;
+}
+
+export interface CheckProgressEvent {
+  stage: string;
+  message: string;
+}
+
+export interface ResultArtifact {
+  id: string;
+  displayName: string;
+  txtPath?: string;
+  docxPath?: string;
+  reportText?: string;
+  updatedAt: string;
+}
+
+export interface ResultOverviewSectionLink {
+  name: string;
+  txtPath: string;
+}
+
+export interface ResultOverviewItem {
+  id: string;
+  sourceName: string;
+  displayName: string;
+  sectionLinks: ResultOverviewSectionLink[];
+  reportDocxPath?: string;
+  sourceCopyPath?: string;
+}
+
+export interface ResultOverview {
+  exists: boolean;
+  path?: string;
+  rawText?: string;
+  items: ResultOverviewItem[];
+}
+
+export interface TextFileContent {
+  exists: boolean;
+  path: string;
+  text?: string;
+}
+
 export interface FormatPreset {
   rulesPath: string;
-  pageTop: string;
-  pageBottom: string;
-  pageLeft: string;
-  pageRight: string;
-  bodyFont: string;
-  bodySize: string;
-  bodyAlign: string;
-  tableFont: string;
-  tableSize: string;
-  tableHAlign: string;
-  tableVAlign: string;
-  title1Font: string;
-  title1Size: string;
-  title2Font: string;
-  title2Size: string;
+  values: Record<string, Record<string, string>>;
 }
 
 export interface RulesConfig {

@@ -1,7 +1,9 @@
 use std::collections::hash_map::DefaultHasher;
+use std::collections::HashMap;
 use std::fs;
 use std::hash::{Hash, Hasher};
 use std::path::PathBuf;
+use std::process::Command;
 
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
@@ -55,6 +57,14 @@ struct VerifyResult {
     plan_index: i32,
     valid_days: i32,
     activated_on_days: i64,
+}
+
+#[derive(Debug, Clone)]
+struct LegacyDeviceStore {
+    serial_num: String,
+    reg_code: String,
+    un_token: String,
+    un1_token: String,
 }
 
 #[derive(Debug, Error)]
@@ -239,6 +249,15 @@ pub fn set_auth_mode(mode: &str, udisk_drive: Option<&str>) -> Result<LicenseSta
         if drive.is_empty() {
             return Err(LicenseError::Invalid("请输入正确的U盾盘符，例如 E:".to_string()));
         }
+        let root = format!("{drive}\\");
+        if !PathBuf::from(&root).exists() {
+            return Err(LicenseError::Invalid(
+                "U盾未插入，如果U盾已插入，请在认证模式的输入框中输入正确的U盾的盘符！".to_string(),
+            ));
+        }
+        if read_volume_serial(&drive).is_none() {
+            return Err(LicenseError::Invalid("无法读取U盾卷序列号，请确认U盾盘符正确！".to_string()));
+        }
         store.udisk_drive = drive;
     }
     let new_machine = generate_machine_code(&store);
@@ -370,6 +389,32 @@ fn ensure_store_fields(store: &mut LicenseStore) -> Result<(), LicenseError> {
     let decoded = decode_use_count_token(&store.un1_token);
     if decoded != store.use_count {
         store.use_count = decoded;
+        changed = true;
+    }
+    if store.auth_mode == "device" && store.reg_code.trim().is_empty() && store.use_count <= 0 {
+        let current_machine = generate_machine_code(store);
+        if let Some(legacy) = load_legacy_device_store(&current_machine) {
+            if store.serial_num != legacy.serial_num
+                || store.reg_code != legacy.reg_code
+                || store.un_token != legacy.un_token
+                || store.un1_token != legacy.un1_token
+            {
+                store.serial_num = legacy.serial_num;
+                store.reg_code = legacy.reg_code;
+                store.un_token = legacy.un_token;
+                store.un1_token = legacy.un1_token;
+                store.use_count = decode_use_count_token(&store.un1_token);
+                changed = true;
+            }
+        }
+    }
+    let current_machine = generate_machine_code(store);
+    if current_machine != store.machine_code {
+        store.machine_code = current_machine;
+        store.serial_num = generate_serial_num(&store.machine_code);
+        store.reg_code.clear();
+        store.use_count = 0;
+        store.un1_token = encode_use_count_token(0);
         changed = true;
     }
     if changed {
@@ -681,13 +726,18 @@ fn check_clock_ok(token: &str) -> Result<(), String> {
 }
 
 fn sumatra_exists() -> bool {
-    let manifest_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-    let app_root = manifest_dir.parent().unwrap_or(&manifest_dir);
-    app_root.join("SumatraPDF.exe").exists()
+    runtime_app_root().join("SumatraPDF.exe").exists()
 }
 
 fn load_or_init_store() -> Result<LicenseStore, LicenseError> {
     let path = store_path();
+    let legacy_path = development_app_root().join("data").join("license.json");
+    if path != legacy_path && !path.exists() && legacy_path.exists() {
+        let content = fs::read_to_string(&legacy_path)?;
+        let store: LicenseStore = serde_json::from_str(&content)?;
+        save_store(&store)?;
+        return Ok(store);
+    }
     if !path.exists() {
         let mut s = LicenseStore::default();
         s.auth_mode = "device".to_string();
@@ -715,28 +765,127 @@ fn save_store(store: &LicenseStore) -> Result<(), LicenseError> {
     Ok(())
 }
 
-fn store_path() -> PathBuf {
+fn development_app_root() -> PathBuf {
     let manifest_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-    let app_root = manifest_dir.parent().unwrap_or(&manifest_dir);
-    app_root.join("data").join("license.json")
+    manifest_dir
+        .parent()
+        .map(|p| p.to_path_buf())
+        .unwrap_or(manifest_dir)
+}
+
+fn runtime_app_root() -> PathBuf {
+    let dev_root = development_app_root();
+    if let Ok(exe) = std::env::current_exe() {
+        if let Some(exe_dir) = exe.parent() {
+            let dir_name = exe_dir
+                .file_name()
+                .and_then(|x| x.to_str())
+                .unwrap_or("")
+                .to_ascii_lowercase();
+            let parent_name = exe_dir
+                .parent()
+                .and_then(|x| x.file_name())
+                .and_then(|x| x.to_str())
+                .unwrap_or("")
+                .to_ascii_lowercase();
+            if parent_name == "target" && (dir_name == "debug" || dir_name == "release") {
+                return dev_root;
+            }
+            return exe_dir.to_path_buf();
+        }
+    }
+    dev_root
+}
+
+fn store_path() -> PathBuf {
+    runtime_app_root().join("data").join("license.json")
+}
+
+fn legacy_config_paths() -> Vec<PathBuf> {
+    let mut paths = Vec::new();
+    let dev_root = development_app_root();
+    if let Some(work_root) = dev_root.parent() {
+        paths.push(work_root.join("AiCheckBid_clean").join("AiCheckBid").join("bin").join("Release").join("AiCheckBid.exe.config"));
+        paths.push(work_root.join("AiCheckBid_clean").join("AiCheckBid").join("app.config"));
+    }
+    let runtime_root = runtime_app_root();
+    paths.push(runtime_root.join("AiCheckBid.exe.config"));
+    paths.push(runtime_root.join("AiCheckBid").join("AiCheckBid.exe.config"));
+    paths
+}
+
+fn load_legacy_device_store(current_machine: &str) -> Option<LegacyDeviceStore> {
+    for path in legacy_config_paths() {
+        if !path.exists() {
+            continue;
+        }
+        let text = fs::read_to_string(&path).ok()?;
+        let settings = parse_legacy_app_settings(&text);
+        let mode = settings.get("Mode").map(|s| s.trim()).unwrap_or("");
+        if mode != "本机" && !mode.eq_ignore_ascii_case("device") {
+            continue;
+        }
+        let serial_num = settings.get("SerialNum").cloned().unwrap_or_default();
+        if serial_num.trim().is_empty() || !verify_serial_machine_match(&serial_num, current_machine) {
+            continue;
+        }
+        return Some(LegacyDeviceStore {
+            serial_num,
+            reg_code: settings.get("RegCode").cloned().unwrap_or_default(),
+            un_token: settings.get("UN").cloned().unwrap_or_default(),
+            un1_token: settings.get("UN1").cloned().unwrap_or_default(),
+        });
+    }
+    None
+}
+
+fn parse_legacy_app_settings(text: &str) -> HashMap<String, String> {
+    let mut map = HashMap::new();
+    for line in text.lines() {
+        let trimmed = line.trim();
+        if !trimmed.starts_with("<add ") {
+            continue;
+        }
+        let Some(key) = extract_xml_attr(trimmed, "key") else {
+            continue;
+        };
+        let Some(value) = extract_xml_attr(trimmed, "value") else {
+            continue;
+        };
+        map.insert(key, value);
+    }
+    map
+}
+
+fn extract_xml_attr(line: &str, name: &str) -> Option<String> {
+    let pattern = format!(r#"{name}=""#);
+    let start = line.find(&pattern)? + pattern.len();
+    let rest = &line[start..];
+    let end = rest.find('"')?;
+    Some(rest[..end].to_string())
+}
+
+fn windows_system_path(file_name: &str) -> PathBuf {
+    let root = std::env::var_os("WINDIR")
+        .or_else(|| std::env::var_os("SystemRoot"))
+        .map(PathBuf::from)
+        .unwrap_or_else(|| PathBuf::from(r"C:\Windows"));
+    root.join("System32").join(file_name)
 }
 
 fn generate_machine_code(store: &LicenseStore) -> String {
     if store.auth_mode == "udisk" {
         let drive = normalize_drive_letter(&store.udisk_drive);
         if !drive.is_empty() {
-            let seed = format!("UDISK|{}|AICHECKBID", drive.to_uppercase());
-            let mut hasher = DefaultHasher::new();
-            seed.hash(&mut hasher);
-            return format!("{:016X}", hasher.finish());
+            if let Some(serial) = read_volume_serial(&drive) {
+                let seed = format!("UDISK|{}|{}|AICHECKBID", drive.to_uppercase(), serial);
+                let mut hasher = DefaultHasher::new();
+                seed.hash(&mut hasher);
+                return format!("{:016X}", hasher.finish());
+            }
         }
     }
-    let computer = std::env::var("COMPUTERNAME").unwrap_or_else(|_| "UNKNOWNPC".to_string());
-    let cpu = std::env::var("PROCESSOR_IDENTIFIER").unwrap_or_else(|_| "UNKNOWNCPU".to_string());
-    let seed = format!("{computer}|{cpu}|AICHECKBID");
-    let mut hasher = DefaultHasher::new();
-    seed.hash(&mut hasher);
-    format!("{:016X}", hasher.finish())
+    read_processor_id().unwrap_or_else(|| "123456789".to_string())
 }
 
 fn validate_auth_mode(store: &LicenseStore) -> Result<(), LicenseError> {
@@ -755,7 +904,78 @@ fn validate_auth_mode(store: &LicenseStore) -> Result<(), LicenseError> {
             "U盾未插入，如果U盾已插入，请在认证模式的输入框中输入正确的U盾的盘符！".to_string(),
         ));
     }
+    if read_volume_serial(&drive).is_none() {
+        return Err(LicenseError::Invalid("无法读取U盾卷序列号，请确认U盾盘符正确！".to_string()));
+    }
     Ok(())
+}
+
+fn read_volume_serial(drive: &str) -> Option<String> {
+    let root = format!("{drive}\\");
+    let output = Command::new(windows_system_path("cmd.exe"))
+        .args(["/C", "vol", root.as_str()])
+        .output()
+        .ok()?;
+    if !output.status.success() {
+        return None;
+    }
+    let text = String::from_utf8_lossy(&output.stdout);
+    for token in text.split_whitespace() {
+        let cleaned = token.trim_matches(|c: char| !c.is_ascii_hexdigit() && c != '-');
+        if is_volume_serial(cleaned) {
+            return Some(cleaned.to_ascii_uppercase());
+        }
+    }
+    None
+}
+
+fn read_processor_id() -> Option<String> {
+    let output = Command::new(windows_system_path("WindowsPowerShell\\v1.0\\powershell.exe"))
+        .args([
+            "-NoProfile",
+            "-NonInteractive",
+            "-Command",
+            "(Get-CimInstance Win32_Processor | Select-Object -First 1 -ExpandProperty ProcessorId)",
+        ])
+        .output()
+        .ok()?;
+    if output.status.success() {
+        let text = String::from_utf8_lossy(&output.stdout).trim().to_string();
+        if !text.is_empty() {
+            return Some(text);
+        }
+    }
+
+    let output = Command::new(windows_system_path("wbem\\WMIC.exe"))
+        .args(["cpu", "get", "ProcessorId"])
+        .output()
+        .ok()?;
+    if !output.status.success() {
+        return None;
+    }
+    let text = String::from_utf8_lossy(&output.stdout);
+    for line in text.lines() {
+        let trimmed = line.trim();
+        if trimmed.is_empty() || trimmed.eq_ignore_ascii_case("ProcessorId") {
+            continue;
+        }
+        return Some(trimmed.to_string());
+    }
+    None
+}
+
+fn is_volume_serial(input: &str) -> bool {
+    if input.len() != 9 {
+        return false;
+    }
+    let chars: Vec<char> = input.chars().collect();
+    if chars[4] != '-' {
+        return false;
+    }
+    chars
+        .iter()
+        .enumerate()
+        .all(|(idx, ch)| idx == 4 || ch.is_ascii_hexdigit())
 }
 
 fn normalize_drive_letter(input: &str) -> String {

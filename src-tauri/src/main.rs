@@ -14,6 +14,8 @@ fn main() {
             commands::list_plans,
             commands::purchase_plan,
             commands::activate_license,
+            commands::dev_activate_yearly,
+            commands::get_app_debug_flags,
             commands::set_auth_mode,
             commands::get_default_rules_path_command,
             commands::get_format_preset,
@@ -23,9 +25,13 @@ fn main() {
             commands::export_rules_copy,
             commands::open_result_folder,
             commands::open_path,
+            commands::open_result_for_file,
             commands::open_result_summary,
-            commands::list_title_rule_presets
+            commands::get_result_overview,
+            commands::get_text_file_content,
+            commands::list_title_rule_presets,
+            commands::list_result_artifacts
         ])
-        .run(tauri::generate_context!())
+        .run(tauri::generate_context!("./tauri.conf.json"))
         .expect("failed to run tauri app");
 }

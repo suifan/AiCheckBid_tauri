@@ -1,0 +1,100 @@
+﻿﻿{
+  "generatedAt": "2026-06-05T11:18:25",
+  "samples": [
+    {
+      "name": "sample.docx",
+      "issueCount": 7,
+      "parser": "dotnet-sidecar-net48-spire"
+    },
+    {
+      "name": "技术暗标表格调整版m.docx",
+      "issueCount": 4,
+      "parser": "dotnet-sidecar-net48-spire"
+    }
+  ],
+  "techHashChecks": [
+    {
+      "file": "1的格式检查结果.txt",
+      "hash": "21607A3A3778CA691D1C626CD8CD866E5249D09CC5D0772682F973AD2BC34FD1"
+    },
+    {
+      "file": "1的其他检查结果.txt",
+      "hash": "CC6832C99EF4A8C23B34255E25E5A9101288F7CCED91B4ACE11F53D471F2AC8F"
+    }
+  ],
+  "smartFixScenario": {
+    "name": "技术暗标表格调整版m.docx-smartfix",
+    "issueCount": 3,
+    "parser": "dotnet-sidecar-net48-spire",
+    "reportDocxExists": true,
+    "sourceCopyExists": true,
+    "sourceCopyRecheckIssueCount": 3,
+    "sourceCopyHash": "E8CD2282A4639AB4975A7DF1C1EDE49A19D49306891C5C645DA19DED7AFB7B85"
+  },
+  "textCheckScenario": {
+    "name": "sample.docx-textcheck",
+    "issueCount": 11,
+    "parser": "dotnet-sidecar-net48-spire",
+    "hashChecks": [
+      {
+        "file": "1的公司名检查结果.txt",
+        "hash": "B91C99614BEEF3CA684ECB6E954DA21B2F26A7633C18AC4FC5EADB85D62AF626"
+      },
+      {
+        "file": "1的地名检查结果.txt",
+        "hash": "2EF30C1A91E3042B5A01A673560D0B5C093AF4995FF380416C7CA9DE4DF2A0F5"
+      },
+      {
+        "file": "1的敏感词检查结果.txt",
+        "hash": "BA377286F7372376008EF90EBE53B69EF07BA727EA99BAF6FD3D440C6F114061"
+      },
+      {
+        "file": "1的标点符号检查结果.txt",
+        "hash": "CC34500AF96DF51DC30CA965EDA2B438ADE1454B6174EEFC96D1413CF8A8FFF9"
+      },
+      {
+        "file": "1的其他检查结果.txt",
+        "hash": "DE0BDA4ABFF1B0F02D1FE923A65B6DF5BCDBBED6828BB2EBDC38EB3DB7DD62CE"
+      }
+    ]
+  },
+  "batchScenario": {
+    "overviewLineCount": 2,
+    "overviewContains": [
+      "samplem",
+      "技术暗标表格调整版mmm"
+    ],
+    "artifacts": [
+      "检查结果-samplem.docx",
+      "检查结果-技术暗标表格调整版mmm.docx",
+      "samplem.docx",
+      "技术暗标表格调整版mmm.docx"
+    ],
+    "contentChecks": [
+      {
+        "file": "1的格式检查结果.txt",
+        "contains": "测试文档 Hello AiCheckBid"
+      },
+      {
+        "file": "2的格式检查结果.txt",
+        "contains": "现场观摩区是公众直观了解处置过程的核心区域"
+      },
+      {
+        "file": "1的其他检查结果.txt",
+        "contains": "测试文档 Hello AiCheckBid"
+      },
+      {
+        "file": "2的其他检查结果.txt",
+        "contains": "一级保障（必保）"
+      },
+      {
+        "file": "1的标点符号检查结果.txt",
+        "contains": "未发现问题。"
+      },
+      {
+        "file": "2的标点符号检查结果.txt",
+        "contains": "未发现问题。"
+      }
+    ]
+  }
+}

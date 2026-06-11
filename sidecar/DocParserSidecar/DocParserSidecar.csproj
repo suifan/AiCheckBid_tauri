@@ -8,11 +8,11 @@
 
   <ItemGroup>
     <Reference Include="Spire.Doc">
-      <HintPath>..\..\..\AiCheckBid_clean\AiCheckBid\spire.doc.dll</HintPath>
+      <HintPath>..\lib\spire.doc.dll</HintPath>
       <Private>true</Private>
     </Reference>
     <Reference Include="Spire.License">
-      <HintPath>..\..\..\AiCheckBid_clean\AiCheckBid\spire.license.dll</HintPath>
+      <HintPath>..\lib\spire.license.dll</HintPath>
       <Private>true</Private>
     </Reference>
   </ItemGroup>

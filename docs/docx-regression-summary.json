@@ -1,0 +1,138 @@
+﻿{
+    "generatedAt":  "2026-06-05T21:25:52",
+    "samples":  [
+                    {
+                        "name":  "sample.docx",
+                        "input":  "D:\\work\\ollama\\AiCheckBid_tauri\\sample.docx",
+                        "issueCount":  7,
+                        "parser":  "dotnet-sidecar-net48-spire",
+                        "reportPath":  "D:\\work\\ollama\\AiCheckBid_tauri\\tmp_regression_sample\\检查结果-samplem.txt",
+                        "reportDocxPath":  "D:\\work\\ollama\\AiCheckBid_tauri\\tmp_regression_sample\\检查结果-samplem.docx",
+                        "topRules":  "检查空格: 1, 首行缩进字符数: 1, 字号: 1, 右边距: 1, 上边距: 1, 下边距: 1, 左边距: 1",
+                        "outputDir":  "D:\\work\\ollama\\AiCheckBid_tauri\\tmp_regression_sample"
+                    },
+                    {
+                        "name":  "技术暗标表格调整版m.docx",
+                        "input":  "D:\\work\\ollama\\AiCheckBid_tauri\\result_net48_verify\\技术暗标表格调整版m.docx",
+                        "issueCount":  4,
+                        "parser":  "dotnet-sidecar-net48-spire",
+                        "reportPath":  "D:\\work\\ollama\\AiCheckBid_tauri\\tmp_regression_tech\\检查结果-技术暗标表格调整版mm.txt",
+                        "reportDocxPath":  "D:\\work\\ollama\\AiCheckBid_tauri\\tmp_regression_tech\\检查结果-技术暗标表格调整版mm.docx",
+                        "topRules":  "检查空格: 2, 表格水平对齐方式: 1, 首行缩进字符数: 1",
+                        "outputDir":  "D:\\work\\ollama\\AiCheckBid_tauri\\tmp_regression_tech"
+                    }
+                ],
+    "techHashChecks":  [
+                           {
+                               "file":  "1的格式检查结果.txt",
+                               "baselineHash":  "21607A3A3778CA691D1C626CD8CD866E5249D09CC5D0772682F973AD2BC34FD1",
+                               "actualHash":  "21607A3A3778CA691D1C626CD8CD866E5249D09CC5D0772682F973AD2BC34FD1",
+                               "matches":  true
+                           },
+                           {
+                               "file":  "1的其他检查结果.txt",
+                               "baselineHash":  "CC6832C99EF4A8C23B34255E25E5A9101288F7CCED91B4ACE11F53D471F2AC8F",
+                               "actualHash":  "CC6832C99EF4A8C23B34255E25E5A9101288F7CCED91B4ACE11F53D471F2AC8F",
+                               "matches":  true
+                           }
+                       ],
+    "smartFixScenario":  {
+                             "name":  "技术暗标表格调整版m.docx-smartfix",
+                             "issueCount":  3,
+                             "parser":  "dotnet-sidecar-net48-spire",
+                             "reportDocxExists":  true,
+                             "sourceCopyExists":  true,
+                             "sourceCopyHash":  "640F31AAC5035DE84AD92D8600F3E5EEEFE6393639F84072A3C90E931A4C62B4",
+                             "sourceCopyRecheckIssueCount":  3
+                         },
+    "textCheckScenario":  {
+                              "name":  "sample.docx-textcheck",
+                              "issueCount":  11,
+                              "parser":  "dotnet-sidecar-net48-spire",
+                              "hashChecks":  [
+                                                 {
+                                                     "file":  "1的公司名检查结果.txt",
+                                                     "actualHash":  "B91C99614BEEF3CA684ECB6E954DA21B2F26A7633C18AC4FC5EADB85D62AF626"
+                                                 },
+                                                 {
+                                                     "file":  "1的地名检查结果.txt",
+                                                     "actualHash":  "2EF30C1A91E3042B5A01A673560D0B5C093AF4995FF380416C7CA9DE4DF2A0F5"
+                                                 },
+                                                 {
+                                                     "file":  "1的敏感词检查结果.txt",
+                                                     "actualHash":  "BA377286F7372376008EF90EBE53B69EF07BA727EA99BAF6FD3D440C6F114061"
+                                                 },
+                                                 {
+                                                     "file":  "1的标点符号检查结果.txt",
+                                                     "actualHash":  "CC34500AF96DF51DC30CA965EDA2B438ADE1454B6174EEFC96D1413CF8A8FFF9"
+                                                 },
+                                                 {
+                                                     "file":  "1的其他检查结果.txt",
+                                                     "actualHash":  "DE0BDA4ABFF1B0F02D1FE923A65B6DF5BCDBBED6828BB2EBDC38EB3DB7DD62CE"
+                                                 }
+                                             ]
+                          },
+    "batchScenario":  {
+                          "overviewLineCount":  2,
+                          "overviewContains":  [
+                                                   {
+                                                       "value":  "samplem",
+                                                       "exists":  true
+                                                   },
+                                                   {
+                                                       "value":  "技术暗标表格调整版mmm",
+                                                       "exists":  true
+                                                   }
+                                               ],
+                          "artifacts":  [
+                                            {
+                                                "file":  "检查结果-samplem.docx",
+                                                "exists":  true
+                                            },
+                                            {
+                                                "file":  "检查结果-技术暗标表格调整版mmm.docx",
+                                                "exists":  true
+                                            },
+                                            {
+                                                "file":  "samplem.docx",
+                                                "exists":  true
+                                            },
+                                            {
+                                                "file":  "技术暗标表格调整版mmm.docx",
+                                                "exists":  true
+                                            }
+                                        ],
+                          "contentChecks":  [
+                                                {
+                                                    "file":  "1的格式检查结果.txt",
+                                                    "contains":  "测试文档 Hello AiCheckBid",
+                                                    "matches":  true
+                                                },
+                                                {
+                                                    "file":  "2的格式检查结果.txt",
+                                                    "contains":  "现场观摩区是公众直观了解处置过程的核心区域",
+                                                    "matches":  true
+                                                },
+                                                {
+                                                    "file":  "1的其他检查结果.txt",
+                                                    "contains":  "测试文档 Hello AiCheckBid",
+                                                    "matches":  true
+                                                },
+                                                {
+                                                    "file":  "2的其他检查结果.txt",
+                                                    "contains":  "一级保障（必保）",
+                                                    "matches":  true
+                                                },
+                                                {
+                                                    "file":  "1的标点符号检查结果.txt",
+                                                    "contains":  "未发现问题。",
+                                                    "matches":  true
+                                                },
+                                                {
+                                                    "file":  "2的标点符号检查结果.txt",
+                                                    "contains":  "未发现问题。",
+                                                    "matches":  true
+                                                }
+                                            ]
+                      }
+}
